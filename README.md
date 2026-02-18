@@ -1,2 +1,3 @@
 # homelab
-My over-engineered home network.
+
+_My over-engineered home network._
