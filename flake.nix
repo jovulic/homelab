@@ -6,15 +6,23 @@
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
     };
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     inputs@{
-      self,
+      # self,
       nixpkgs,
       flake-parts,
       ...
     }:
+    let
+      lib = inputs.nixpkgs.lib;
+      hosts = import ./l1 { inherit inputs; };
+    in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
@@ -41,10 +49,19 @@
               pkgs.git
               pkgs.bash
               pkgs.just
+              pkgs.deploy-rs
             ];
           };
-          packages = {
-          };
+          packages = inputs.nixpkgs.lib.mapAttrs' (name: cfg: {
+            name = "${name}-bootstrap";
+            value = cfg.bootstrap;
+          }) hosts;
         };
+      flake = {
+        nixosConfigurations = lib.mapAttrs (name: cfg: cfg.system) hosts;
+        deploy = {
+          nodes = lib.foldl' (acc: cfg: acc // cfg.deploy.nodes) { } (builtins.attrValues hosts);
+        };
+      };
     };
 }
