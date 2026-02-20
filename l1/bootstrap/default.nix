@@ -1,0 +1,64 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  cfg = config.bootstrap;
+in
+with lib;
+{
+  options = {
+    bootstrap = {
+      enable = mkOption {
+        type = types.bool;
+        description = "Enable machine bootstrap.";
+        default = true;
+      };
+      device = mkOption {
+        type = types.str;
+        description = "The target device path to bootstrap.";
+        example = "/dev/nvme0n1";
+      };
+      hostname = mkOption {
+        type = types.str;
+        description = "The host hostname.";
+      };
+      user.key = mkOption {
+        type = types.str;
+        description = "The user authorized key.";
+        default = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
+      };
+    };
+  };
+  config =
+    let
+      bootstrap = pkgs.writeShellApplication {
+        name = "bootstrap";
+        text = builtins.readFile (
+          pkgs.replaceVars ./bootstrap.sh {
+            device = cfg.device;
+            hostname = cfg.hostname;
+            user_key = cfg.user.key;
+          }
+        );
+      };
+    in
+    mkIf cfg.enable {
+      systemd.services.bootstrap = {
+        enable = true;
+        wantedBy = [ "multi-user.target" ];
+        after = [ "getty@tty1.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = [
+            "${pkgs.bash}/bin/bash -c 'source ${config.system.build.setEnvironment}; ${bootstrap}/bin/bootstrap'"
+          ];
+          StandardInput = "null";
+          StandardOutput = "journal+console";
+          StandardError = "inherit";
+        };
+      };
+    };
+}
