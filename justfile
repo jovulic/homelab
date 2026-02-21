@@ -10,7 +10,7 @@ flash host device:
     @echo "Are you sure you want to flash the iso for '{{host}}' to '{{device}}'? (y/N)"
     @read -p "Confirm: " confirm && [ "$confirm" = "y" ] || { echo "Aborted."; exit 1; }
     @echo "Flashing ISO to {{device}}..."
-    sudo dd if=result/iso/*.iso of={{device}} status=progress conv=fsync
+    sudo dd if="$(ls ./result/iso/*.iso)" of={{device}} status=progress conv=fsync
     @echo "Done!"
 
 # List all hosts.
