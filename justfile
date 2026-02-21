@@ -1,3 +1,4 @@
+# Wipe a device (in preparation for usage in flash).
 wipe device:
     @echo "Are you sure you want to wipe device '{{device}}'? (y/N)"
     @read -p "Confirm: " confirm && [ "$confirm" = "y" ] || { echo "Aborted."; exit 1; }
