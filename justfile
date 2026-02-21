@@ -14,6 +14,11 @@ flash host device:
     sudo dd if="$(ls ./result/iso/*.iso)" of={{device}} status=progress conv=fsync
     @echo "Done!"
 
+# Generates and emits the hardware config for the given host. Useful when doing
+# initial setup of a new host.
+hwconfig host:
+    ssh root@{{host}}.lan "nixos-generate-config --show-hardware-config"
+
 # List all hosts.
 hosts:
     @nix eval .#nixosConfigurations --apply builtins.attrNames
