@@ -19,6 +19,9 @@ with lib;
   };
   config = mkIf cfg.enable {
     nix = {
+      extraOptions = ''
+        experimental-features = nix-command flakes
+      '';
       gc = {
         automatic = true;
       };
