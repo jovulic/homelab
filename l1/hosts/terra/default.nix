@@ -18,6 +18,7 @@ let
             enable = true;
             device = "/dev/nvme0n1";
             hostname = name;
+            user.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
           };
           system.stateVersion = lib.trivial.release;
         }
@@ -26,6 +27,7 @@ let
   targetSystem = nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
+      ../../modules
       (
         {
           config,
@@ -38,51 +40,43 @@ let
             (modulesPath + "/installer/scan/not-detected.nix")
           ];
 
-          boot = {
-            initrd = {
-              luks.devices.luksroot = {
-                device = "/dev/nvme0n1p3";
-                allowDiscards = true;
-                keyFile = "/dev/nvme0n1p1";
-                keyFileSize = 4096;
-              };
-              availableKernelModules = [
+          nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+          hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+          homelab = {
+            boot = {
+              initrd.luksDevice = "/dev/nvme0n1p3";
+              initrd.luksKeyFile = "/dev/nvme0n1p1";
+              initrd.luksKeyFileSize = 4096;
+              initrd.availableKernelModules = [
                 "xhci_pci"
                 "ahci"
                 "nvme"
                 "usb_storage"
                 "sd_mod"
               ];
-              kernelModules = [ "dm-snapshot" ];
+              initrd.kernelModules = [ "dm-snapshot" ];
+              kernelModules = [ "kvm-intel" ];
+              extraModulePackages = [ ];
             };
-            kernelModules = [ "kvm-intel" ];
-            extraModulePackages = [ ];
+
+            network = {
+              hostName = name;
+              hostAddress = "192.168.1.5";
+              networkInterfaces = [
+                "enp1s0"
+                "enp2s0"
+              ];
+            };
+
+            user = {
+              key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
+            };
           };
 
-          fileSystems."/" = {
-            device = "/dev/disk/by-label/root";
-            fsType = "ext4";
-          };
-
-          fileSystems."/boot" = {
-            device = "/dev/disk/by-label/boot";
-            fsType = "vfat";
-            options = [
-              "fmask=0022"
-              "dmask=0022"
-            ];
-          };
-
-          swapDevices = [ ];
-
-          nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-          hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+          system.stateVersion = "25.11";
         }
       )
-      ../../modules
-      {
-        system.stateVersion = "25.11";
-      }
     ];
   };
 in
