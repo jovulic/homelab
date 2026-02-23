@@ -33,3 +33,5 @@ The following applies to configuration found under the "Network" tab.
    2. Set encryption to `WPA2-PSK`.
    3. Set key.
    4. Set country.
+6. Configure DNS for static addresses...
+   1. Add hostname mapping `terra.lan` to `192.168.1.5`.
