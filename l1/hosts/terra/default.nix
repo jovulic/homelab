@@ -72,6 +72,21 @@ let
             user = {
               key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
             };
+
+            zfs = {
+              enable = true;
+              hostId = "028406e6";
+              vdev = [
+                "mirror"
+                "wwn-0x5000c500c5cd54c6"
+                "wwn-0x5000c500c5ce3e12"
+                "mirror"
+                "wwn-0x5000c500e9a4e625"
+                "wwn-0x5000c500e9927d89"
+              ];
+              cacheDevice = "/dev/disk/by-id/nvme-EDILOCA_EN605_1TB_AA243050132";
+              setup = true;
+            };
           };
 
           system.stateVersion = "25.11";

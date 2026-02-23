@@ -7,5 +7,6 @@
     ./nix.nix
     ./tools.nix
     ./user.nix
+    ./zfs.nix
   ];
 }
