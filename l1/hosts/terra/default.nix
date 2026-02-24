@@ -90,6 +90,10 @@ let
               };
               setup = true;
             };
+
+            iscsi.target = {
+              enable = true;
+            };
           };
 
           system.stateVersion = "25.11";
