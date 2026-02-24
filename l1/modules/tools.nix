@@ -20,6 +20,10 @@ with lib;
   };
   config = mkIf cfg.enable {
     environment.systemPackages = [
+      pkgs.zfs # zfs filesystem linux userspace tools
+      pkgs.gptfdisk # set of text-mode partitioning tools for globally unique identifier (guid) partition table (gpt) disks
+      pkgs.parted # create, destroy, resize, check, and copy partitions
+      pkgs.systemd # system and service manager for linux
       pkgs.coreutils # gnu core utilities
       pkgs.neovim # vim text editor fork focused on extensibility and agility
     ];
