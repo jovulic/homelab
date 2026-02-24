@@ -84,7 +84,10 @@ let
                 "wwn-0x5000c500e9a4e625"
                 "wwn-0x5000c500e9927d89"
               ];
-              cacheDevice = "/dev/disk/by-id/nvme-EDILOCA_EN605_1TB_AA243050132";
+              ssd = {
+                enable = true;
+                device = "/dev/disk/by-id/nvme-EDILOCA_EN605_1TB_AA243050132";
+              };
               setup = true;
             };
           };
