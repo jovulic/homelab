@@ -28,7 +28,7 @@ with lib;
       user.key = mkOption {
         type = types.str;
         description = "The user authorized key.";
-        example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
+        example = "ssh-ed25519 ...";
       };
     };
   };
@@ -36,6 +36,17 @@ with lib;
     let
       bootstrap = pkgs.writeShellApplication {
         name = "bootstrap";
+        runtimeInputs = [
+          pkgs.coreutils
+          pkgs.util-linux
+          pkgs.dosfstools
+          pkgs.cryptsetup
+          pkgs.lvm2
+          pkgs.e2fsprogs
+          pkgs.nixos-install-tools
+          pkgs.systemd
+          pkgs.nix
+        ];
         text = builtins.readFile (
           pkgs.replaceVars ./bootstrap.sh {
             device = cfg.device;
@@ -52,9 +63,7 @@ with lib;
         after = [ "getty@tty1.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = [
-            "${pkgs.bash}/bin/bash -c 'source ${config.system.build.setEnvironment}; ${bootstrap}/bin/bootstrap'"
-          ];
+          ExecStart = "${bootstrap}/bin/bootstrap";
           StandardInput = "null";
           StandardOutput = "journal+console";
           StandardError = "inherit";
