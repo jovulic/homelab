@@ -19,24 +19,19 @@ let
   );
 
   # Import each host.
-  hosts = lib.genAttrs hostDirs (
-    name:
-    let
-      host = pkgs.callPackage (./hosts + "/${name}") {
+  hosts = lib.fix (
+    self:
+    lib.genAttrs hostDirs (
+      name:
+      import (./hosts + "/${name}/default.nix") {
         inherit
           nixpkgs
           deploy-rs
-          system
+          lib
           ;
-      };
-    in
-    builtins.removeAttrs host [
-      "override"
-      "overrideDerivation"
-    ]
+        hosts = self;
+      }
+    )
   );
-
-  # Combine all hosts into a single attribute set.
-  mergedHosts = lib.mergeAttrsList (builtins.attrValues hosts);
 in
-mergedHosts
+hosts

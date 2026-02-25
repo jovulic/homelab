@@ -1,5 +1,4 @@
 {
-  nixpkgs,
   config,
   lib,
   pkgs,
@@ -8,29 +7,8 @@
 let
   cfg = config.homelab.netboot;
 
-  userKey = config.homelab.user.key;
-  mkNetbootImage =
-    host:
-    (import "${nixpkgs}/nixos/lib/eval-config.nix" {
-      inherit (pkgs) system;
-      modules = [
-        "${nixpkgs}/nixos/modules/installer/netboot/netboot-minimal.nix"
-        ../../bootstrap
-        {
-          bootstrap = {
-            enable = true;
-            device = host.device;
-            hostname = host.hostname;
-            user.key = userKey;
-          };
-          system.stateVersion = lib.trivial.release;
-        }
-      ];
-    }).config.system.build;
-
   hostImages = map (host: {
-    inherit (host) mac hostname;
-    build = mkNetbootImage host;
+    inherit (host) mac hostname build;
   }) cfg.hosts;
 
   setupHostScript = pkgs.writeShellApplication {
@@ -82,9 +60,9 @@ with lib;
               type = types.str;
               description = "The MAC address of the host to netboot.";
             };
-            device = mkOption {
-              type = types.str;
-              description = "The target device path for bootstrap.";
+            build = mkOption {
+              type = types.attrs;
+              description = "The pre-built netboot image.";
             };
           };
         }

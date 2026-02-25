@@ -2,6 +2,7 @@
   nixpkgs,
   deploy-rs,
   lib,
+  hosts ? { },
   ...
 }:
 let
@@ -93,6 +94,13 @@ let
             iscsi.target = {
               enable = true;
             };
+
+            netboot = {
+              enable = true;
+              hosts = [
+                hosts.frost.netboot
+              ];
+            };
           };
 
           system.stateVersion = "25.11";
@@ -102,21 +110,18 @@ let
   };
 in
 {
-  ${name} = {
-    bootstrap = bootstrapUsb;
-    system = targetSystem;
-    deploy = {
-      nodes = {
-        ${name} = {
-          hostname = "${name}.lan";
-          profiles.system = {
-            sshUser = "root";
-            user = "root";
-            path = deploy-rs.lib.x86_64-linux.activate.nixos targetSystem;
-          };
+  bootstrap = bootstrapUsb;
+  system = targetSystem;
+  deploy = {
+    nodes = {
+      ${name} = {
+        hostname = "${name}.lan";
+        profiles.system = {
+          sshUser = "root";
+          user = "root";
+          path = deploy-rs.lib.x86_64-linux.activate.nixos targetSystem;
         };
       };
-
     };
   };
 }
