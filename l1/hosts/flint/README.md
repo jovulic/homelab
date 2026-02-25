@@ -35,3 +35,4 @@ The following applies to configuration found under the "Network" tab.
    4. Set country.
 6. Configure DNS for static addresses...
    1. Add hostname mapping `terra.lan` to `192.168.1.5`.
+   2. Add hostname mapping `frost.lan` to `192.168.1.10`.
