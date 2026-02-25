@@ -31,6 +31,8 @@ let
       ../../modules
       (
         {
+          config,
+          lib,
           modulesPath,
           ...
         }:
@@ -38,6 +40,9 @@ let
           imports = [
             (modulesPath + "/installer/scan/not-detected.nix")
           ];
+
+          nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+          hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
           homelab = {
             boot = {
@@ -48,8 +53,10 @@ let
                 "xhci_pci"
                 "ahci"
                 "nvme"
-                "usbhid"
                 "sdhci_pci"
+              ];
+              initrd.kernelModules = [
+                "dm-snapshot"
               ];
               kernelModules = [ "kvm-intel" ];
             };
