@@ -52,10 +52,14 @@
               pkgs.deploy-rs
             ];
           };
-          packages = inputs.nixpkgs.lib.mapAttrs' (name: cfg: {
-            name = "${name}-bootstrap";
-            value = cfg.bootstrap;
-          }) hosts;
+          packages =
+            let
+              bootstrapHosts = inputs.nixpkgs.lib.filterAttrs (_name: cfg: cfg ? bootstrap) hosts;
+            in
+            inputs.nixpkgs.lib.mapAttrs' (name: cfg: {
+              name = "${name}-bootstrap";
+              value = cfg.bootstrap;
+            }) bootstrapHosts;
         };
       flake = {
         nixosConfigurations = lib.mapAttrs (name: cfg: cfg.system) hosts;
