@@ -70,7 +70,7 @@ with lib;
         after = [ "getty@tty1.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = pkgs.writeShellScript "bootstrap-start" ''
+          ExecStart = pkgs.writeShellScript "bootstrap_start" ''
             source ${config.system.build.setEnvironment}
             ${bootstrap}/bin/bootstrap
           '';
