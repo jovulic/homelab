@@ -3,9 +3,13 @@
 set -veuo pipefail
 
 DEVICE="@device@"
-DEVICE_P1="${DEVICE}p1"
-DEVICE_P2="${DEVICE}p2"
-DEVICE_P3="${DEVICE}p3"
+case "$DEVICE" in
+*[0-9]) SEP="p" ;; # ends in a number (e.g., nvme0n1), use 'p'
+*) SEP="" ;;       # ends in a letter (e.g., sda), use nothing
+esac
+DEVICE_P1="${DEVICE}${SEP}1"
+DEVICE_P2="${DEVICE}${SEP}2"
+DEVICE_P3="${DEVICE}${SEP}3"
 HOST_NAME="@hostname@"
 USER_KEY="@user_key@"
 
