@@ -36,3 +36,9 @@ The following applies to configuration found under the "Network" tab.
 6. Configure DNS for static addresses...
    1. Add hostname mapping `terra.lan` to `192.168.1.5`.
    2. Add hostname mapping `frost.lan` to `192.168.1.10`.
+   3. Add hostname mapping `phantom.lan` to `192.168.1.11`.
+   4. Add hostname mapping `hades.lan` to `192.168.1.12`.
+   5. Add hostname mapping `optiplex.lan` to `192.168.1.13`.
+   6. Add hostname mapping `think1.lan` to `192.168.1.14`.
+   7. Add hostname mapping `think2.lan` to `192.168.1.15`.
+   8. Add hostname mapping `think3.lan` to `192.168.1.16`.
