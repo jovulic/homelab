@@ -11,6 +11,7 @@ let
   inherit (inputs) nixpkgs deploy-rs;
   inherit (pkgs) lib;
 
+  # NOTE: We ignore phantom as the machine is currently in-use elsewhere.
   ignoredHosts = [ "phantom" ];
 
   # List all host directories with a default.nix.
