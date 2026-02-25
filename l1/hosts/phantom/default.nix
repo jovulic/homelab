@@ -1,0 +1,90 @@
+{
+  nixpkgs,
+  deploy-rs,
+  lib,
+  ...
+}:
+let
+  name = "phantom";
+  userKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
+  system = "x86_64-linux";
+  bootstrapNetboot =
+    (nixpkgs.lib.nixosSystem {
+      inherit system;
+      modules = [
+        "${nixpkgs}/nixos/modules/installer/netboot/netboot-minimal.nix"
+        ../../bootstrap
+        {
+          bootstrap = {
+            enable = true;
+            device = "/dev/nvme0n1";
+            hostname = name;
+            user.key = userKey;
+          };
+          system.stateVersion = lib.trivial.release;
+        }
+      ];
+    }).config.system.build;
+  targetSystem = nixpkgs.lib.nixosSystem {
+    inherit system;
+    modules = [
+      ../../modules
+      (
+        {
+          modulesPath,
+          ...
+        }:
+        {
+          imports = [
+            (modulesPath + "/installer/scan/not-detected.nix")
+          ];
+
+          homelab = {
+            boot = {
+              initrd.luksDevice = "/dev/nvme0n1p3";
+              initrd.luksKeyFile = "/dev/nvme0n1p1";
+              initrd.luksKeyFileSize = 4096;
+              initrd.availableKernelModules = [
+                "xhci_pci"
+                "thunderbolt"
+                "nvme"
+                "rtsx_pci_sdmmc"
+              ];
+              kernelModules = [ "kvm-intel" ];
+            };
+
+            network = {
+              hostName = name;
+              hostAddress = "192.168.1.11";
+              networkInterfaces = [ "enp89s0" ];
+            };
+
+            user.key = userKey;
+          };
+
+          system.stateVersion = "25.11";
+        }
+      )
+    ];
+  };
+in
+{
+  netboot = {
+    hostname = name;
+    mac = "54:b2:03:f0:c0:aa";
+    build = bootstrapNetboot;
+  };
+  system = targetSystem;
+  deploy = {
+    nodes = {
+      ${name} = {
+        hostname = "${name}.lan";
+        profiles.system = {
+          sshUser = "root";
+          user = "root";
+          path = deploy-rs.lib.x86_64-linux.activate.nixos targetSystem;
+        };
+      };
+    };
+  };
+}

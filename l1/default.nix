@@ -11,10 +11,15 @@ let
   inherit (inputs) nixpkgs deploy-rs;
   inherit (pkgs) lib;
 
+  ignoredHosts = [ "phantom" ];
+
   # List all host directories with a default.nix.
   hostDirs = builtins.attrNames (
     lib.filterAttrs (
-      name: type: type == "directory" && builtins.pathExists (./hosts + "/${name}/default.nix")
+      name: type:
+      type == "directory"
+      && builtins.pathExists (./hosts + "/${name}/default.nix")
+      && !builtins.elem name ignoredHosts
     ) (builtins.readDir ./hosts)
   );
 
