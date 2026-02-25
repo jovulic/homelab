@@ -6,6 +6,7 @@
 }:
 let
   name = "terra";
+  userKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
   system = "x86_64-linux";
   bootstrapUsb =
     (nixpkgs.lib.nixosSystem {
@@ -18,7 +19,7 @@ let
             enable = true;
             device = "/dev/nvme0n1";
             hostname = name;
-            user.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
+            user.key = userKey;
           };
           system.stateVersion = lib.trivial.release;
         }
@@ -69,9 +70,7 @@ let
               ];
             };
 
-            user = {
-              key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
-            };
+            user.key = userKey;
 
             zfs = {
               enable = true;
