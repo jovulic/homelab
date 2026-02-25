@@ -86,6 +86,7 @@ cat >/mnt/etc/nixos/configuration.nix <<EOF
   };
   services.openssh.enable = true;
   services.getty.autologinUser = "root";
+  @ignore_lid_switch@
 }
 EOF
 nixos-install --no-root-passwd --option experimental-features 'nix-command flakes'
