@@ -29,33 +29,43 @@ let
     inherit system;
     modules = [
       ../../modules
-      {
-        homelab = {
-          boot = {
-            initrd.luksDevice = "/dev/nvme0n1p3";
-            initrd.luksKeyFile = "/dev/nvme0n1p1";
-            initrd.luksKeyFileSize = 4096;
-            initrd.availableKernelModules = [
-              "xhci_pci"
-              "ahci"
-              "nvme"
-              "usbhid"
-              "sdhci_pci"
-            ];
-            kernelModules = [ "kvm-intel" ];
+      (
+        {
+          modulesPath,
+          ...
+        }:
+        {
+          imports = [
+            (modulesPath + "/installer/scan/not-detected.nix")
+          ];
+
+          homelab = {
+            boot = {
+              initrd.luksDevice = "/dev/nvme0n1p3";
+              initrd.luksKeyFile = "/dev/nvme0n1p1";
+              initrd.luksKeyFileSize = 4096;
+              initrd.availableKernelModules = [
+                "xhci_pci"
+                "ahci"
+                "nvme"
+                "usbhid"
+                "sdhci_pci"
+              ];
+              kernelModules = [ "kvm-intel" ];
+            };
+
+            network = {
+              hostName = name;
+              hostAddress = "192.168.1.10";
+              networkInterfaces = [ "eno1" ];
+            };
+
+            user.key = userKey;
           };
 
-          network = {
-            hostName = name;
-            hostAddress = "192.168.1.10";
-            networkInterfaces = [ "eno1" ];
-          };
-
-          user.key = userKey;
-        };
-
-        system.stateVersion = "25.11";
-      }
+          system.stateVersion = "25.11";
+        }
+      )
     ];
   };
 in
