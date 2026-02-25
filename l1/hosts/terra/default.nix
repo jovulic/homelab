@@ -99,6 +99,12 @@ let
               enable = true;
               hosts = [
                 hosts.frost.netboot
+                # hosts.phantom.netboot
+                hosts.hades.netboot
+                hosts.optiplex.netboot
+                hosts.think1.netboot
+                hosts.think2.netboot
+                hosts.think3.netboot
               ];
             };
           };
