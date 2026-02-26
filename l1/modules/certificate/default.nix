@@ -107,6 +107,10 @@ with lib;
       };
     in
     mkIf cfg.enable {
+      # NOTE: The group is used as a way for other users to have access to
+      # certificates.
+      users.groups.certs = { };
+
       environment.systemPackages = with pkgs; [
         cfssl
       ];
