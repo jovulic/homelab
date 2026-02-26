@@ -107,6 +107,10 @@ let
                 hosts.think3.netboot
               ];
             };
+
+            registry = {
+              enable = true;
+            };
           };
 
           system.stateVersion = "25.11";
