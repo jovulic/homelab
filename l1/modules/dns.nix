@@ -5,6 +5,7 @@
 }:
 let
   cfg = config.homelab.dns;
+  hostAddress = config.homelab.network.hostAddress;
 in
 with lib;
 {
@@ -14,10 +15,20 @@ with lib;
       default = false;
       description = "Enable dns.";
     };
-    records = mkOption {
-      type = types.lines;
-      default = "";
-      description = "DNS records to add to the lab zone, one per line.";
+    zones = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            records = mkOption {
+              type = types.lines;
+              default = "";
+              description = "DNS records for this zone.";
+            };
+          };
+        }
+      );
+      default = { };
+      description = "DNS zones to handle.";
     };
   };
 
@@ -25,23 +36,30 @@ with lib;
     networking.firewall.allowedTCPPorts = [ 53 ];
     networking.firewall.allowedUDPPorts = [ 53 ];
 
-    environment.etc."coredns/lab.db".text = ''
-      $ORIGIN lab.
-      $TTL 3600
-      @ IN SOA ns admin 1 86400 7200 4000000 11200
+    environment.etc = mapAttrs' (
+      name: zone:
+      nameValuePair "coredns/${name}.db" {
+        text = ''
+          $ORIGIN ${name}.
+          $TTL 3600
+          @ IN SOA ns admin 1 86400 7200 4000000 11200
 
-      @ IN NS ns
-      ns IN A 192.168.1.5
+          @ IN NS ns
+          ns IN A ${hostAddress}
 
-      ${cfg.records}
-    '';
+          ${zone.records}
+        '';
+      }
+    ) cfg.zones;
 
     services.coredns = {
       enable = true;
       config = ''
         .:53 {
           errors
-          file /etc/coredns/lab.db lab
+          ${concatStringsSep "\n" (
+            mapAttrsToList (name: zone: "file /etc/coredns/${name}.db ${name}") cfg.zones
+          )}
           forward . /etc/resolv.conf
           cache 30
           loop

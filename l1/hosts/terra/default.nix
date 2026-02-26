@@ -138,10 +138,12 @@ let
 
             dns = {
               enable = true;
-              records = ''
-                registry.lab. IN A 192.168.1.5
-                *.registry.lab. IN A 192.168.1.5
-              '';
+              zones."lab" = {
+                records = ''
+                  registry.lab. IN A 192.168.1.5
+                  *.registry.lab. IN A 192.168.1.5
+                '';
+              };
             };
           };
 
