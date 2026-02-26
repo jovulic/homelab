@@ -26,7 +26,12 @@ with lib;
     networking.firewall.allowedUDPPorts = [ 53 ];
 
     environment.etc."coredns/lab.db".text = ''
-      lab. IN SOA ns.lab. admin.lab. 1 86400 7200 4000000 11200
+      $ORIGIN lab.
+      $TTL 3600
+      @ IN SOA ns admin 1 86400 7200 4000000 11200
+
+      @ IN NS ns
+      ns IN A 192.168.1.5
 
       ${cfg.records}
     '';
