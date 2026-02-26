@@ -42,3 +42,4 @@ The following applies to configuration found under the "Network" tab.
    6. Add hostname mapping `think1.lan` to `192.168.1.14`.
    7. Add hostname mapping `think2.lan` to `192.168.1.15`.
    8. Add hostname mapping `think3.lan` to `192.168.1.16`.
+7. Configure DNS forwardings for `.lab` to DNS server on `terra` (`/*.lab/192.168.1.5`).
