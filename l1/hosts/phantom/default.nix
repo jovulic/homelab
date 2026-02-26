@@ -60,6 +60,11 @@ let
             };
 
             user.key = userKey;
+
+            iscsi.initiator = {
+              enable = true;
+              iqn = "iqn.2006-01.org.linux-iscsi.${name}";
+            };
           };
 
           system.stateVersion = "25.11";
