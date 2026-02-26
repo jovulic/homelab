@@ -111,6 +111,38 @@ let
             registry = {
               enable = true;
             };
+
+            certificate = {
+              enable = true;
+              certificates = {
+                registry = {
+                  commonName = "registry.lab";
+                  hosts = [
+                    "registry.lab"
+                    "*.registry.lab"
+                  ];
+                };
+              };
+            };
+
+            proxy = {
+              enable = true;
+              hosts."registry.lab" = {
+                certificate = "registry";
+                locations."/" = {
+                  proxyPass = "http://127.0.0.1:5000";
+                  extraConfig = "client_max_body_size 0;";
+                };
+              };
+            };
+
+            dns = {
+              enable = true;
+              records = ''
+                registry.lab. IN A 192.168.1.5
+                *.registry.lab. IN A 192.168.1.5
+              '';
+            };
           };
 
           system.stateVersion = "25.11";

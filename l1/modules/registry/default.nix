@@ -102,7 +102,5 @@ with lib;
         };
         startAt = "daily";
       };
-
-      networking.firewall.allowedTCPPorts = [ cfg.registryPort ];
     };
 }
