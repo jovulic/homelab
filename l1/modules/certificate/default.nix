@@ -16,7 +16,7 @@ with lib;
       description = "Enable certificate generation";
     };
 
-    rootCA = {
+    rootCertificateAuthority = {
       commonName = mkOption {
         type = types.str;
         default = "Homelab Root CA";
@@ -117,15 +117,15 @@ with lib;
 
       environment.etc = {
         "certs/ca.json".text = builtins.toJSON {
-          CN = cfg.rootCA.commonName;
+          CN = cfg.rootCertificateAuthority.commonName;
           key = {
             algo = "ecdsa";
             size = 256;
           };
           names = [
             {
-              O = cfg.rootCA.organization;
-              OU = cfg.rootCA.organizationalUnit;
+              O = cfg.rootCertificateAuthority.organization;
+              OU = cfg.rootCertificateAuthority.organizationalUnit;
             }
           ];
         };
