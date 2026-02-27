@@ -31,7 +31,7 @@ deploy host:
 deploy_all:
     deploy .
 
-# Fetch the homelab CA certificate from terra and install it locally.
+# Fetch the homelab CA certificate from terra and install it locally and in the repo.
 fetch_ca:
-    ssh root@terra.lan "cat /var/lib/certs/ca.pem" | sudo tee /etc/ssl/certs/ca-homelab.crt > /dev/null
-    @echo "CA certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt"
+    ssh root@terra.lan "cat /var/lib/certs/ca.pem" | sudo tee /etc/ssl/certs/ca-homelab.crt > .data/public/ca.pem
+    @echo "CA certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt and .data/public/ca.pem"
