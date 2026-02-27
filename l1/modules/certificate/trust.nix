@@ -5,7 +5,6 @@
 }:
 let
   cfg = config.homelab.certificate.trust;
-  caPath = "/etc/ssl/certs/ca-homelab.crt";
 in
 with lib;
 {
@@ -17,6 +16,10 @@ with lib;
     };
   };
   config = mkIf cfg.enable {
-    security.pki.certificates = (optional (builtins.pathExists caPath) (builtins.readFile caPath));
+    security.pki.certificates =
+      let
+        caPath = ../../../../.data/public/ca.pem;
+      in
+      [ ] ++ (optional (builtins.pathExists caPath) (builtins.readFile caPath));
   };
 }
