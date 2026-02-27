@@ -112,7 +112,7 @@ let
               enable = true;
             };
 
-            certificate = {
+            certificate.authority = {
               enable = true;
               certificates = {
                 registry = {
@@ -124,6 +124,7 @@ let
                 };
               };
             };
+            certificate.trust.enable = true;
 
             proxy = {
               enable = true;

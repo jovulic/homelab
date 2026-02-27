@@ -76,6 +76,8 @@ let
               enable = true;
               iqn = "iqn.2006-01.org.linux-iscsi.${name}";
             };
+
+            certificate.trust.enable = true;
           };
 
           system.stateVersion = "25.11";
