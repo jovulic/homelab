@@ -7,6 +7,7 @@
 }:
 let
   name = "terra";
+  address = "192.168.1.5";
   userKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
   system = "x86_64-linux";
   bootstrapUsb =
@@ -64,7 +65,7 @@ let
 
             network = {
               hostName = name;
-              hostAddress = "192.168.1.5";
+              hostAddress = address;
               networkInterfaces = [
                 "enp1s0"
                 "enp2s0"
@@ -110,16 +111,30 @@ let
 
             registry = {
               enable = true;
+              address = "127.0.0.1";
+              port = 5000;
             };
 
             certificate.authority = {
               enable = true;
+              server = {
+                enable = true;
+                address = "127.0.0.1";
+                port = 23775;
+              };
               certificates = {
                 registry = {
                   commonName = "registry.lab";
                   hosts = [
                     "registry.lab"
                     "*.registry.lab"
+                  ];
+                };
+                certificate = {
+                  commonName = "certificate.lab";
+                  hosts = [
+                    "certificate.lab"
+                    "*.certificate.lab"
                   ];
                 };
               };
@@ -135,14 +150,23 @@ let
                   extraConfig = "client_max_body_size 0;";
                 };
               };
+              hosts."certificate.lab" = {
+                certificate = "certificate";
+                locations."/" = {
+                  proxyPass = "http://127.0.0.1:23775";
+                };
+              };
             };
 
             dns = {
               enable = true;
               zones."lab" = {
                 records = ''
-                  registry.lab. IN A 192.168.1.5
-                  *.registry.lab. IN A 192.168.1.5
+                  registry.lab. IN A ${address}
+                  *.registry.lab. IN A ${address}
+
+                  certificate.lab. IN A ${address}
+                  *.certificate.lab. IN A ${address}
                 '';
               };
             };
