@@ -20,12 +20,12 @@ with lib;
       default = "pool/default";
       description = "The name of the ZFS dataset to use for storage.";
     };
-    registryAddress = mkOption {
+    address = mkOption {
       type = types.str;
       default = "0.0.0.0";
       description = "The address the registry will listen on.";
     };
-    registryPort = mkOption {
+    port = mkOption {
       type = types.port;
       default = 5000;
       description = "The port the registry will listen on.";
@@ -35,9 +35,9 @@ with lib;
     let
       setup_registry_storage = pkgs.writeShellApplication {
         name = "setup_registry_storage";
-        runtimeInputs = with pkgs; [
-          zfs
-          coreutils
+        runtimeInputs = [
+          pkgs.zfs
+          pkgs.coreutils
         ];
         text = builtins.readFile (
           pkgs.replaceVars ./setup_storage.sh {
@@ -47,22 +47,22 @@ with lib;
       };
       setup_registry_cleaner = pkgs.writeShellApplication {
         name = "setup_registry_cleaner";
-        runtimeInputs = with pkgs; [
-          curl
-          jq
-          coreutils
-          gnused
-          gawk
+        runtimeInputs = [
+          pkgs.curl
+          pkgs.jq
+          pkgs.coreutils
+          pkgs.gnused
+          pkgs.gawk
         ];
         text = builtins.readFile (
           pkgs.replaceVars ./setup_cleaner.sh {
-            registry_url = "http://127.0.0.1:${toString cfg.registryPort}";
+            registry_url = "http://127.0.0.1:${toString cfg.port}";
           }
         );
       };
     in
     mkIf cfg.enable {
-      systemd.services."registry_storage" = {
+      systemd.services.registry-storage = {
         description = "Setup ZFS storage for container registry";
         wantedBy = [ "multi-user.target" ];
         after = [
@@ -87,14 +87,14 @@ with lib;
 
       services.dockerRegistry = {
         enable = true;
-        listenAddress = cfg.registryAddress;
-        port = cfg.registryPort;
+        listenAddress = cfg.address;
+        port = cfg.port;
         storagePath = "/var/lib/registry";
         enableDelete = true;
         enableGarbageCollect = true;
       };
 
-      systemd.services."registry_cleaner" = {
+      systemd.services.registry-cleaner = {
         description = "Clean up old container registry images";
         serviceConfig = {
           Type = "oneshot";

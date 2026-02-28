@@ -74,12 +74,12 @@ with lib;
     let
       setup_zfs = pkgs.writeShellApplication {
         name = "setup_zfs";
-        runtimeInputs = with pkgs; [
-          zfs
-          gptfdisk
-          parted
-          systemd
-          coreutils
+        runtimeInputs = [
+          pkgs.zfs
+          pkgs.gptfdisk
+          pkgs.parted
+          pkgs.systemd
+          pkgs.coreutils
         ];
         text = builtins.readFile (
           pkgs.replaceVars ./setup_zfs.sh {
@@ -128,7 +128,7 @@ with lib;
         };
       };
 
-      systemd.services."setup_zfs" = mkIf cfg.setup {
+      systemd.services.setup-zf = mkIf cfg.setup {
         enable = true;
         wantedBy = [ "multi-user.target" ];
         after = [ "getty@tty1.service" ];
