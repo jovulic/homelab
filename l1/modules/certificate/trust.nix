@@ -18,7 +18,7 @@ with lib;
   config = mkIf cfg.enable {
     security.pki.certificates =
       let
-        caPath = ../../../../.data/public/ca.pem;
+        caPath = ../../../../.data/ca.pem;
       in
       [ ] ++ (optional (builtins.pathExists caPath) (builtins.readFile caPath));
   };
