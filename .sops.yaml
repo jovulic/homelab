@@ -1,0 +1,25 @@
+# .sops.yaml
+keys:
+  - &me "107A71AD63624047D9F7E0FAA44F84C1393D6324"
+  - &terra "age1qan8s2fskr9wlcmnnymmlqqf2pkyqmxpklaunp2sjq4dwurm0pls79x36q"
+  - &frost "age1jkdl7cu2hr8786x5mdlkyjkvqcc23me637g6rxl795f6zyj4ugpqxsyqar"
+  - &hades "age1cqet5jrtygqg8pv9rhp2rjzwka6p38rt20a523fu2y0qwzsfps9qmmwa2j"
+  - &phantom "age1s9hhhvtwr492aa06lp5skxuke4y3pvkfn3a8n0g33dgghxx2sd5syf0zs3"
+  - &optiplex "age1ej4fta5sdmkcuq0xn57ed276ddr5r50uzj27x2skr77yxzedmv6sh0t70n"
+  - &think1 "age13p2jjtzrykzt0pctf8ysev9srnafmkq69gyy70qqg38e6kpne4qqzfzke6"
+  - &think2 "age1sxzcrxx7u7557xpftec0r2yk3w4nvalla0zx8efdqammfy9y4ahqussa35"
+  - &think3 "age14x4eu58dmjclr0y223w04dpu5m2e6pksxay0kga27c5ryr5zugqszt07qh"
+creation_rules:
+  - path_regex: .data/enc\..*
+    key_groups:
+      - pgp:
+          - *me
+        age:
+          - *terra
+          - *frost
+          - *hades
+          - *phantom
+          - *optiplex
+          - *think1
+          - *think2
+          - *think3

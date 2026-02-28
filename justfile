@@ -35,3 +35,18 @@ deploy_all:
 fetch_ca:
     ssh root@terra.lan "cat /var/lib/certs/ca.pem" | sudo tee /etc/ssl/certs/ca-homelab.crt > .data/ca.pem
     @echo "CA certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt and .data/ca.pem"
+
+# Pull a host's SSH public key and convert it to an age public key.
+host_to_age host:
+    ssh-keyscan {{host}}.lan 2>/dev/null | grep ssh-ed25519 | ssh-to-age
+
+# Re-encrypt all secrets using the current keys in .sops.yaml.
+refresh_secrets:
+    @for f in .data/enc.*; do \
+        echo "Refreshing $f..."; \
+        sops updatekeys "$f"; \
+    done
+
+# Edit the shared cfssl HMAC key secret.
+edit_cfssl_shared_secret:
+    sops .data/enc.cfssl_auth_key.txt

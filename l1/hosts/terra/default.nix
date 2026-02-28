@@ -1,6 +1,7 @@
 {
   nixpkgs,
   deploy-rs,
+  sops-nix,
   lib,
   hosts ? { },
   ...
@@ -30,6 +31,7 @@ let
   targetSystem = nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
+      sops-nix.nixosModules.sops
       ../../modules
       (
         {
