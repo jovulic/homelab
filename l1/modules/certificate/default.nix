@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./authority.nix
+    ./authority
     ./trust.nix
   ];
 }
