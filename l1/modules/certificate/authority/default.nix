@@ -69,6 +69,7 @@ with lib;
                 "server"
                 "client"
                 "peer"
+                "intermediate"
               ];
               default = "server";
               description = "cfssl profile to use";
@@ -77,15 +78,29 @@ with lib;
         }
       );
     };
+
+    server = {
+      enable = mkEnableOption "Enable cfssl server";
+      address = mkOption {
+        type = types.str;
+        default = "0.0.0.0";
+        description = "Address for the cfssl server";
+      };
+      port = mkOption {
+        type = types.port;
+        default = 23775;
+        description = "Port for the cfssl server";
+      };
+    };
   };
 
   config =
     let
       setup_certs = pkgs.writeShellApplication {
         name = "setup_certs";
-        runtimeInputs = with pkgs; [
-          cfssl
-          coreutils
+        runtimeInputs = [
+          pkgs.cfssl
+          pkgs.coreutils
         ];
         text = builtins.readFile (
           pkgs.replaceVars ./setup_certs.sh {
@@ -111,8 +126,8 @@ with lib;
       # certificates.
       users.groups.certs = { };
 
-      environment.systemPackages = with pkgs; [
-        cfssl
+      environment.systemPackages = [
+        pkgs.cfssl
       ];
 
       environment.etc = {
@@ -163,6 +178,20 @@ with lib;
                 ];
                 expiry = "8760h";
               };
+              intermediate = {
+                usages = [
+                  "signing"
+                  "digital signature"
+                  "key encipherment"
+                  "cert sign"
+                  "crl sign"
+                ];
+                expiry = "43800h";
+                ca_constraint = {
+                  is_ca = true;
+                  max_path_len = 1;
+                };
+              };
             };
           };
         };
@@ -187,7 +216,7 @@ with lib;
         }
       ) cfg.certificates);
 
-      systemd.services."certificates" = {
+      systemd.services.setup-certs = {
         description = "Generate certificates";
         wantedBy = [ "multi-user.target" ];
         after = [ "local-fs.target" ];
@@ -195,6 +224,18 @@ with lib;
           Type = "oneshot";
           RemainAfterExit = true;
           ExecStart = "${setup_certs}/bin/setup_certs";
+        };
+      };
+
+      systemd.services.cfssl-serve = mkIf cfg.server.enable {
+        description = "cfssl server";
+        after = [ "certificates.service" ];
+        requires = [ "certificates.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          ExecStart = "${pkgs.cfssl}/bin/cfssl serve -address ${cfg.server.address} -port ${toString cfg.server.port} -ca /var/lib/certs/ca.pem -ca-key /var/lib/certs/ca-key.pem -config /etc/certs/cfssl.json";
+          WorkingDirectory = "/var/lib/certs";
+          User = "root";
         };
       };
     };
