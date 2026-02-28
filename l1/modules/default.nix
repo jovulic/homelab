@@ -5,6 +5,7 @@
     ./certificate
     ./dns.nix
     ./iscsi
+    ./kubernetes
     ./monitor.nix
     ./netboot
     ./network.nix
