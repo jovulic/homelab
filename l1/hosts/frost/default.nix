@@ -75,6 +75,22 @@ let
             };
 
             certificate.trust.enable = true;
+            certificate.remote = {
+              enable = true;
+              server = "https://certificate.lab";
+              certificates.k8s-ca = {
+                commonName = "Kubernetes CA";
+                profile = "intermediate";
+              };
+            };
+
+            host.kubernetes = {
+              masterAddress = "${name}.lan";
+              master = {
+                enable = true;
+                certificateName = "k8s-ca";
+              };
+            };
           };
 
           system.stateVersion = "25.11";
