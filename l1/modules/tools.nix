@@ -26,6 +26,7 @@ with lib;
       pkgs.systemd # system and service manager for linux
       pkgs.coreutils # gnu core utilities
       pkgs.neovim # vim text editor fork focused on extensibility and agility
+      pkgs.kubectl # kubernetes cli
     ];
   };
 }

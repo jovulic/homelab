@@ -1,0 +1,119 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  cfg = config.host.kubernetes.master;
+in
+with lib;
+{
+  options = {
+    host.kubernetes.master = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable kubernetes master configuration.";
+      };
+    };
+  };
+  config = mkIf cfg.enable {
+    networking = {
+      firewall = {
+        allowedTCPPorts = [
+          # https://kubernetes.io/docs/reference/ports-and-protocols/#control-plane
+          6443 # kubernetes api server
+          2379 # etcd (client)
+          2380 # etcd (peer)
+          10259 # kube-scheduler
+          10257 # kube-controller-manager
+          2381 # etcd (metrics)
+        ];
+      };
+    };
+    systemd.services = {
+      kubernetes-secrets = {
+        description = "Setup Kubernetes Secrets";
+        enable = true;
+        wantedBy = [ "multi-user.target" ];
+        after = [ "certificates.service" ];
+        requires = [ "certificates.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${
+            pkgs.writeShellApplication {
+              name = "setup_secrets";
+              runtimeInputs = with pkgs; [ coreutils ];
+              text = builtins.readFile ./setup_secrets.sh;
+            }
+          }/bin/setup_secrets";
+        };
+      };
+    };
+    services.kubernetes = {
+      roles = [ "master" ];
+      masterAddress = config.host.kubernetes.masterAddress;
+
+      kubelet = {
+        cni.config = [
+          {
+            name = "mynet";
+            type = "flannel";
+            cniVersion = "0.3.1";
+            delegate = {
+              hairpinMode = true;
+              isDefaultGateway = true;
+              bridge = "mynet";
+            };
+          }
+        ];
+      };
+      proxy = {
+        # Reasons for extra options.
+        # --metrics-bind-address - we bind the metrics server to 0.0.0.0 so it can be scraped by prometheus.
+        extraOpts = ''
+          --metrics-bind-address=0.0.0.0:10249
+        '';
+      };
+      apiserver = {
+        # Introduce requestheader apiserver options to support the
+        # kubernetes aggregation layer (metrics-server, for
+        # example).
+        #
+        # --requestheader-allowed-names="" means any CN is acceptable.
+        # See https://kubernetes.io/docs/tasks/extend-kubernetes/configure-aggregation-layer/#ca-reusage-and-conflicts.
+        extraOpts = ''
+          --requestheader-client-ca-file=/var/lib/kubernetes/secrets/ca.pem \
+          --requestheader-allowed-names=""
+        '';
+      };
+      controllerManager = {
+        bindAddress = "0.0.0.0";
+        securePort = 10257;
+        # Reasons for extra options.
+        # --authorization-always-allow-paths - we add /metrics to more easily allow for scraping by prometheus.
+        extraOpts = ''
+          --cluster-signing-cert-file /var/lib/kubernetes/secrets/ca.pem \
+          --cluster-signing-key-file /var/lib/kubernetes/secrets/ca-key.pem \
+          --authorization-always-allow-paths "/healthz,/readyz,/livez,/metrics"
+        '';
+      };
+      scheduler = {
+        address = "0.0.0.0";
+        port = 10259;
+        # Reasons for extra options.
+        # --authorization-always-allow-paths - we add /metrics to more easily allow for scraping by prometheus.
+        extraOpts = ''
+          --authorization-always-allow-paths "/healthz,/readyz,/livez,/metrics"
+        '';
+      };
+    };
+    services.etcd = {
+      extraConf = {
+        "LISTEN_METRICS_URLS" = "http://0.0.0.0:2381";
+      };
+    };
+  };
+}
