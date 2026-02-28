@@ -16,6 +16,11 @@ with lib;
         default = false;
         description = "Enable kubernetes master configuration.";
       };
+      certificateName = mkOption {
+        type = types.str;
+        default = "ca";
+        description = "Name of the certificate to use as Kubernetes CA (found in /var/lib/certs/)";
+      };
     };
   };
   config = mkIf cfg.enable {
@@ -32,24 +37,26 @@ with lib;
         ];
       };
     };
-    systemd.services = {
-      kubernetes-secrets = {
-        description = "Setup Kubernetes Secrets";
-        enable = true;
-        wantedBy = [ "multi-user.target" ];
-        after = [ "certificates.service" ];
-        requires = [ "certificates.service" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${
-            pkgs.writeShellApplication {
-              name = "setup_secrets";
-              runtimeInputs = with pkgs; [ coreutils ];
-              text = builtins.readFile ./setup_secrets.sh;
-            }
-          }/bin/setup_secrets";
-        };
+    systemd.services.kubernetes-secrets = {
+      description = "Setup Kubernetes Secrets";
+      enable = true;
+      wantedBy = [ "multi-user.target" ];
+      after = [ "certificates.service" ];
+      requires = [ "certificates.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${
+          pkgs.writeShellApplication {
+            name = "setup_secrets";
+            runtimeInputs = [ pkgs.coreutils ];
+            text = builtins.readFile (
+              pkgs.replaceVars ./setup_secrets.sh {
+                certificate_name = cfg.certificateName;
+              }
+            );
+          }
+        }/bin/setup_secrets";
       };
     };
     services.kubernetes = {
