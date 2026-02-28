@@ -8,7 +8,7 @@ let
     inherit system;
     config.allowUnfree = true;
   };
-  inherit (inputs) nixpkgs deploy-rs;
+  inherit (inputs) nixpkgs deploy-rs sops-nix;
   inherit (pkgs) lib;
 
   # NOTE: We ignore phantom as the machine is currently in-use elsewhere.
@@ -33,6 +33,7 @@ let
         inherit
           nixpkgs
           deploy-rs
+          sops-nix
           lib
           ;
         hosts = self;
