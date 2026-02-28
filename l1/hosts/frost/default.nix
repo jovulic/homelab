@@ -46,6 +46,13 @@ let
           nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
           hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+          sops = {
+            secrets.cfssl_auth_key = {
+              sopsFile = ../../../.data/enc.cfssl_auth_key.txt;
+              format = "binary";
+            };
+          };
+
           homelab = {
             boot = {
               initrd.luksDevice = "/dev/nvme0n1p3";
@@ -80,6 +87,7 @@ let
             certificate.remote = {
               enable = true;
               server = "https://certificate.lab";
+              authKeyFile = config.sops.secrets.cfssl_auth_key.path;
               certificates.k8s-ca = {
                 commonName = "Kubernetes CA";
                 profile = "intermediate";

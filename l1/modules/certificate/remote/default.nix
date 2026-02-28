@@ -21,6 +21,12 @@ with lib;
       description = "URL of the cfssl server";
     };
 
+    authKeyFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Path to the file containing the shared HMAC key for cfssl authentication";
+    };
+
     certificates = mkOption {
       description = "Certificates to generate";
       default = { };
@@ -75,10 +81,11 @@ with lib;
             generate_remote_certificates = concatStringsSep "\n" (
               mapAttrsToList (name: certCfg: ''
                 if [[ ! -e ${name}.pem ]]; then
-                  cfssl gencert 
-                    -remote ${cfg.server} 
-                    -profile=${certCfg.profile} 
-                    /etc/certs/${name}.json | 
+                  cfssl gencert \
+                    -remote ${cfg.server} \
+                    ${optionalString (cfg.authKeyFile != null) "-authkey ${cfg.authKeyFile}"} \
+                    -profile=${certCfg.profile} \
+                    /etc/certs/${name}.json | \
                   cfssljson -bare ${name}
                 fi
               '') cfg.certificates

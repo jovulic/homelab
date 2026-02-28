@@ -91,6 +91,11 @@ with lib;
         default = 23775;
         description = "Port for the cfssl server";
       };
+      authKeyFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = "Path to the file containing the shared HMAC key for cfssl authentication";
+      };
     };
   };
 
@@ -144,57 +149,71 @@ with lib;
             }
           ];
         };
-        "certs/cfssl.json".text = builtins.toJSON {
-          signing = {
-            default = {
-              expiry = "8760h";
-            };
-            profiles = {
-              peer = {
-                usages = [
-                  "signing"
-                  "digital signature"
-                  "key encipherment"
-                  "client auth"
-                  "server auth"
-                ];
+        "certs/cfssl.json".text = builtins.toJSON (
+          {
+            signing = {
+              default = {
                 expiry = "8760h";
               };
-              server = {
-                usages = [
-                  "signing"
-                  "digital signature"
-                  "key encipherment"
-                  "server auth"
-                ];
-                expiry = "8760h";
-              };
-              client = {
-                usages = [
-                  "signing"
-                  "digital signature"
-                  "key encipherment"
-                  "client auth"
-                ];
-                expiry = "8760h";
-              };
-              intermediate = {
-                usages = [
-                  "signing"
-                  "digital signature"
-                  "key encipherment"
-                  "cert sign"
-                  "crl sign"
-                ];
-                expiry = "43800h";
-                ca_constraint = {
-                  is_ca = true;
-                  max_path_len = 1;
+              profiles = {
+                peer = {
+                  usages = [
+                    "signing"
+                    "digital signature"
+                    "key encipherment"
+                    "client auth"
+                    "server auth"
+                  ];
+                  expiry = "8760h";
+                };
+                server = {
+                  usages = [
+                    "signing"
+                    "digital signature"
+                    "key encipherment"
+                    "server auth"
+                  ];
+                  expiry = "8760h";
+                };
+                client = {
+                  usages = [
+                    "signing"
+                    "digital signature"
+                    "key encipherment"
+                    "client auth"
+                  ];
+                  expiry = "8760h";
+                };
+                intermediate = {
+                  usages = [
+                    "signing"
+                    "digital signature"
+                    "key encipherment"
+                    "cert sign"
+                    "crl sign"
+                  ];
+                  expiry = "43800h";
+                  ca_constraint = {
+                    is_ca = true;
+                    max_path_len = 1;
+                  };
+                  auth_remote = mkIf (cfg.server.authKeyFile != null) {
+                    auth_key = "default";
+                    remote = "default";
+                  };
                 };
               };
             };
-          };
-        };
+          }
+          // (optionalAttrs (cfg.server.authKeyFile != null) {
+            auth_keys = {
+              default = {
+                type = "standard";
+                key = "PLACEHOLDER";
+              };
+            };
+          })
+        );
       }
       // (mapAttrs' (
         name: certCfg:
@@ -229,11 +248,19 @@ with lib;
 
       systemd.services.cfssl-serve = mkIf cfg.server.enable {
         description = "cfssl server";
-        after = [ "certificates.service" ];
-        requires = [ "certificates.service" ];
+        after = [ "setup-certs.service" ];
+        requires = [ "setup-certs.service" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
-          ExecStart = "${pkgs.cfssl}/bin/cfssl serve -address ${cfg.server.address} -port ${toString cfg.server.port} -ca /var/lib/certs/ca.pem -ca-key /var/lib/certs/ca-key.pem -config /etc/certs/cfssl.json";
+          ExecStart = ''
+            ${pkgs.cfssl}/bin/cfssl serve \
+              -address ${cfg.server.address} \
+              -port ${toString cfg.server.port} \
+              -ca /var/lib/certs/ca.pem \
+              -ca-key /var/lib/certs/ca-key.pem \
+              ${optionalString (cfg.server.authKeyFile != null) "-authkey ${cfg.server.authKeyFile}"} \
+              -config /etc/certs/cfssl.json
+          '';
           WorkingDirectory = "/var/lib/certs";
           User = "root";
         };

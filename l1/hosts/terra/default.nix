@@ -48,6 +48,13 @@ let
           nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
           hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+          sops = {
+            secrets.cfssl_auth_key = {
+              sopsFile = ../../../.data/enc.cfssl_auth_key.txt;
+              format = "binary";
+            };
+          };
+
           homelab = {
             boot = {
               initrd.luksDevice = "/dev/nvme0n1p3";
@@ -123,6 +130,7 @@ let
                 enable = true;
                 address = "127.0.0.1";
                 port = 23775;
+                authKeyFile = config.sops.secrets.cfssl_auth_key.path;
               };
               certificates = {
                 registry = {
