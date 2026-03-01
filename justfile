@@ -34,7 +34,12 @@ deploy_all *options:
 # Fetch the homelab CA certificate from terra and install it locally and in the repo.
 fetch_ca:
     ssh root@terra.lan "cat /var/lib/certs/ca.pem" | sudo tee /etc/ssl/certs/ca-homelab.crt > .data/ca.pem
-    @echo "CA certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt and .data/ca.pem"
+    @echo "Fetched CA certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt and .data/ca.pem"
+
+# Fetch the cluster admin homelab kubeconfig and install it locally.
+fetch_kubeconfig:
+    ssh root@frost.lan "kubectl --kubeconfig /etc/kubernetes/cluster-admin.kubeconfig config view --flatten" > $HOME/.kube/config-lab.yaml
+    @echo "Fetched kubeconfig and saved to $HOME/.kube/config-lab.yaml"
 
 # Pull a host's SSH public key and convert it to an age public key.
 host_to_age host:
