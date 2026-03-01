@@ -67,5 +67,8 @@ with lib;
         }
       '';
     };
+
+    systemd.services.coredns.restartTriggers =
+      mapAttrsToList (name: zone: config.environment.etc."coredns/${name}.db".source) cfg.zones;
   };
 }
