@@ -78,8 +78,8 @@ with lib;
       };
 
       systemd.services.docker-registry = {
-        wants = [ "registry_storage.service" ];
-        after = [ "registry_storage.service" ];
+        wants = [ "registry-storage.service" ];
+        after = [ "registry-storage.service" ];
         environment = {
           OTEL_TRACES_EXPORTER = "none"; # disable open telemetry
         };
