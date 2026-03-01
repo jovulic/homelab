@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.homelab.kubernetes.node;
 in
@@ -19,10 +24,32 @@ with lib;
     };
   };
   config = mkIf cfg.enable {
-    systemd.tmpfiles.rules = mkIf (cfg.apitokenFile != null) [
-      "d /var/lib/kubernetes/secrets 0755 root root - -"
-      "C+ /var/lib/kubernetes/secrets/apitoken.secret - - - - ${cfg.apitokenFile}"
-    ];
+    systemd.services.kubernetes-apitoken = mkIf (cfg.apitokenFile != null) {
+      description = "Setup Kubernetes Node API Token";
+      enable = true;
+      wantedBy = [ "multi-user.target" ];
+      after = [ "sops-nix.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${
+          pkgs.writeShellApplication {
+            name = "setup_apitoken";
+            runtimeInputs = [ pkgs.coreutils ];
+            text = builtins.readFile (
+              pkgs.replaceVars ./setup_apitoken.sh {
+                apitoken_file = builtins.toString cfg.apitokenFile;
+              }
+            );
+          }
+        }/bin/setup_apitoken";
+      };
+    };
+    systemd.services.kubelet = mkIf (cfg.apitokenFile != null) {
+      after = [ "kubernetes-apitoken.service" ];
+      requires = [ "kubernetes-apitoken.service" ];
+    };
+
     networking = {
       firewall = {
         allowedTCPPorts = [

@@ -3,7 +3,7 @@ with lib;
 {
   imports = [
     ./master
-    ./node.nix
+    ./node
   ];
   options = {
     homelab.kubernetes = {
