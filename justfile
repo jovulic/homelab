@@ -62,4 +62,4 @@ fetch_apitoken:
 
 # Edit the kubernetes apitoken.
 edit_apitoken:
-    sops .data/enc.api_token.secret
+    sops .data/enc.apitoken.secret
