@@ -77,6 +77,13 @@ let
             };
 
             certificate.trust.enable = true;
+
+            kubernetes = {
+              masterAddress = "frost.lan";
+              node = {
+                enable = true;
+              };
+            };
           };
 
           system.stateVersion = "25.11";

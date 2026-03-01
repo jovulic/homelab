@@ -94,11 +94,14 @@ let
               };
             };
 
-            host.kubernetes = {
+            kubernetes = {
               masterAddress = "${name}.lan";
               master = {
                 enable = true;
                 certificateName = "k8s-ca";
+              };
+              node = {
+                enable = true;
               };
             };
           };
