@@ -60,7 +60,15 @@ with lib;
         }/bin/setup_secrets";
       };
     };
+    # NOTE: We must run cfssl after the above setup in order to get easy certs
+    # to use our custom certificate.
+    systemd.services.cfssl = {
+      after = [ "kubernetes-secrets.service" ];
+      requires = [ "kubernetes-secrets.service" ];
+    };
     services.kubernetes = {
+      # NOTE: By specifying a role things like easyCert and flannel networking
+      # are enabled.
       roles = [ "master" ];
       masterAddress = config.homelab.kubernetes.masterAddress;
 
