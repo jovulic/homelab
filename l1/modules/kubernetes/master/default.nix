@@ -29,11 +29,12 @@ with lib;
         allowedTCPPorts = [
           # https://kubernetes.io/docs/reference/ports-and-protocols/#control-plane
           6443 # kubernetes api server
+          8888 # certmgr (cfssl)
           2379 # etcd (client)
           2380 # etcd (peer)
+          2381 # etcd (metrics)
           10259 # kube-scheduler
           10257 # kube-controller-manager
-          2381 # etcd (metrics)
         ];
       };
     };
@@ -41,8 +42,8 @@ with lib;
       description = "Setup Kubernetes Secrets";
       enable = true;
       wantedBy = [ "multi-user.target" ];
-      after = [ "certificates.service" ];
-      requires = [ "certificates.service" ];
+      after = [ "setup-certs.service" ];
+      requires = [ "setup-certs.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
