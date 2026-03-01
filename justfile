@@ -24,12 +24,12 @@ hosts:
     @nix eval .#nixosConfigurations --apply builtins.attrNames
 
 # Deploy a host.
-deploy host:
-    deploy .#{{host}}
+deploy host *options:
+    deploy .#{{host}} {{options}}
 
 # Deploy all hosts.
-deploy_all:
-    deploy .
+deploy_all *options:
+    deploy . {{options}}
 
 # Fetch the homelab CA certificate from terra and install it locally and in the repo.
 fetch_ca:
