@@ -5,12 +5,12 @@
   ...
 }:
 let
-  cfg = config.host.kubernetes.master;
+  cfg = config.homelab.kubernetes.master;
 in
 with lib;
 {
   options = {
-    host.kubernetes.master = {
+    homelab.kubernetes.master = {
       enable = mkOption {
         type = types.bool;
         default = false;
@@ -61,7 +61,7 @@ with lib;
     };
     services.kubernetes = {
       roles = [ "master" ];
-      masterAddress = config.host.kubernetes.masterAddress;
+      masterAddress = config.homelab.kubernetes.masterAddress;
 
       kubelet = {
         cni.config = [

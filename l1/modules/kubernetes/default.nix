@@ -6,7 +6,7 @@ with lib;
     ./node.nix
   ];
   options = {
-    host.kubernetes = {
+    homelab.kubernetes = {
       masterAddress = mkOption {
         type = types.str;
         description = "The master address.";
