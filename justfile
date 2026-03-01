@@ -55,3 +55,13 @@ refresh_secrets:
 # Edit the shared cfssl HMAC key secret.
 edit_cfssl_shared_secret:
     sops .data/enc.cfssl_auth_key.txt
+
+# Fetch the apitoken from frost and encrypt it using sops.
+fetch_apitoken:
+    ssh root@frost.lan "cat /var/lib/cfssl/apitoken.secret" | \
+    sops --encrypt \
+        --filename-override .data/enc.apitoken.secret \
+        --input-type binary \
+        --output-type binary \
+        /dev/stdin > .data/enc.apitoken.secret
+    @echo "Fetched apitoken.secret and saved to .data/enc.apitoken.secret"
