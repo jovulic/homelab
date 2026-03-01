@@ -11,9 +11,18 @@ with lib;
         default = false;
         description = "Enable kubernetes node configuration.";
       };
+      apitokenFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = "Path to the apitoken secret file.";
+      };
     };
   };
   config = mkIf cfg.enable {
+    systemd.tmpfiles.rules = mkIf (cfg.apitokenFile != null) [
+      "d /var/lib/kubernetes/secrets 0755 root root - -"
+      "C+ /var/lib/kubernetes/secrets/apitoken.secret - - - - ${cfg.apitokenFile}"
+    ];
     networking = {
       firewall = {
         allowedTCPPorts = [

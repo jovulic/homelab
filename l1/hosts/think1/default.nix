@@ -51,6 +51,13 @@ let
 
           services.logind.settings.Login.HandleLidSwitch = "ignore";
 
+          sops = {
+            secrets.apitoken = {
+              sopsFile = ../../../.data/enc.apitoken.secret;
+              format = "binary";
+            };
+          };
+
           homelab = {
             boot = {
               initrd.luksDevice = "/dev/sda3";
@@ -85,6 +92,7 @@ let
               masterAddress = "frost.lan";
               node = {
                 enable = true;
+                apitokenFile = config.sops.secrets.apitoken.path;
               };
             };
           };

@@ -33,6 +33,7 @@ let
       ../../modules
       (
         {
+          config,
           modulesPath,
           ...
         }:
@@ -40,6 +41,13 @@ let
           imports = [
             (modulesPath + "/installer/scan/not-detected.nix")
           ];
+
+          sops = {
+            secrets.apitoken = {
+              sopsFile = ../../../.data/enc.apitoken.secret;
+              format = "binary";
+            };
+          };
 
           homelab = {
             boot = {
@@ -74,6 +82,7 @@ let
               masterAddress = "frost.lan";
               node = {
                 enable = true;
+                apitokenFile = config.sops.secrets.apitoken.path;
               };
             };
           };

@@ -46,6 +46,13 @@ let
           nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
           hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+          sops = {
+            secrets.apitoken = {
+              sopsFile = ../../../.data/enc.apitoken.secret;
+              format = "binary";
+            };
+          };
+
           homelab = {
             boot = {
               initrd.luksDevice = "/dev/nvme0n1p3";
@@ -82,6 +89,7 @@ let
               masterAddress = "frost.lan";
               node = {
                 enable = true;
+                apitokenFile = config.sops.secrets.apitoken.path;
               };
             };
           };
