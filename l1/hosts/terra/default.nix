@@ -49,9 +49,27 @@ let
           hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
           sops = {
-            secrets.cfssl_auth_key = {
-              sopsFile = ../../../.data/enc.cfssl_auth_key.txt;
+            secrets.cfssl-auth-key = {
+              sopsFile = ../../../.data/enc.certificate.cfssl-auth-key;
               format = "binary";
+            };
+            secrets.admin-password = {
+              sopsFile = ../../../.data/enc.identity.admin-password;
+              format = "binary";
+              owner = "kanidm";
+              group = "kanidm";
+            };
+            secrets.idm-admin-password = {
+              sopsFile = ../../../.data/enc.identity.idm-admin-password;
+              format = "binary";
+              owner = "kanidm";
+              group = "kanidm";
+            };
+            secrets.oauth-secret = {
+              sopsFile = ../../../.data/enc.identity.oauth-secret-kubernetes;
+              format = "binary";
+              owner = "kanidm";
+              group = "kanidm";
             };
           };
 
@@ -124,13 +142,25 @@ let
               port = 5000;
             };
 
+            identity = {
+              enable = true;
+              domain = "identity.lab";
+              certificate = "identity";
+              adminPasswordFile = config.sops.secrets.admin-password.path;
+              idmAdminPasswordFile = config.sops.secrets.idm-admin-password.path;
+              kubernetes = {
+                enable = true;
+                secretFile = config.sops.secrets.oauth-secret.path;
+              };
+            };
+
             certificate.authority = {
               enable = true;
               server = {
                 enable = true;
                 address = "127.0.0.1";
                 port = 23775;
-                authKeyFile = config.sops.secrets.cfssl_auth_key.path;
+                authKeyFile = config.sops.secrets.cfssl-auth-key.path;
               };
               certificates = {
                 registry = {
@@ -145,6 +175,13 @@ let
                   hosts = [
                     "certificate.lab"
                     "*.certificate.lab"
+                  ];
+                };
+                identity = {
+                  commonName = "identity.lab";
+                  hosts = [
+                    "identity.lab"
+                    "*.identity.lab"
                   ];
                 };
               };
@@ -166,6 +203,12 @@ let
                   proxyPass = "http://127.0.0.1:23775";
                 };
               };
+              hosts."identity.lab" = {
+                certificate = "identity";
+                locations."/" = {
+                  proxyPass = "http://127.0.0.1:8443";
+                };
+              };
             };
 
             dns = {
@@ -177,6 +220,9 @@ let
 
                   certificate.lab. IN A ${address}
                   *.certificate.lab. IN A ${address}
+
+                  identity.lab. IN A ${address}
+                  *.identity.lab. IN A ${address}
                 '';
               };
             };
