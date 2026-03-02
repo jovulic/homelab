@@ -4,6 +4,7 @@
     ./boot.nix
     ./certificate
     ./dns.nix
+    ./identity.nix
     ./iscsi
     ./kubernetes
     ./monitor.nix
