@@ -34,7 +34,12 @@ deploy_all *options:
 # Fetch the homelab CA certificate from terra and install it locally and in the repo.
 fetch_ca:
     ssh root@terra.lan "cat /var/lib/certs/ca.pem" | sudo tee /etc/ssl/certs/ca-homelab.crt > .data/ca.pem
-    @echo "Fetched CA certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt and .data/ca.pem"
+    @echo "Fetched ca certificate fetched and saved to /etc/ssl/certs/ca-homelab.crt and .data/ca.pem"
+
+# Fetch the homelab k8s CA certificate from frost and install it locally and in the repo.
+fetch_k8s_ca:
+    ssh root@frost.lan "cat /var/lib/certs/k8s-ca.pem" | sudo tee /etc/ssl/certs/k8s-ca-homelab.crt > .data/k8s-ca.pem
+    @echo "Fetched k8s ca certificate fetched and saved to /etc/ssl/certs/k8s-ca-homelab.crt and .data/k8s-ca.pem"
 
 # Fetch the cluster admin homelab kubeconfig and install it locally.
 fetch_kubeconfig:
