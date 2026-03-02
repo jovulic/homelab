@@ -47,8 +47,8 @@ let
           hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
           sops = {
-            secrets.cfssl_auth_key = {
-              sopsFile = ../../../.data/enc.cfssl_auth_key.txt;
+            secrets.cfssl-auth-key = {
+              sopsFile = ../../../.data/enc.certificate.cfssl-auth-key;
               format = "binary";
             };
           };
@@ -87,7 +87,7 @@ let
             certificate.remote = {
               enable = true;
               server = "https://certificate.lab";
-              authKeyFile = config.sops.secrets.cfssl_auth_key.path;
+              authKeyFile = config.sops.secrets.cfssl-auth-key.path;
               certificates.k8s-ca = {
                 commonName = "Kubernetes CA";
                 profile = "intermediate";

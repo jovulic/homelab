@@ -44,7 +44,7 @@ let
 
           sops = {
             secrets.apitoken = {
-              sopsFile = ../../../.data/enc.apitoken.secret;
+              sopsFile = ../../../.data/enc.kubernetes.apitoken;
               format = "binary";
             };
           };
