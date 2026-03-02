@@ -41,6 +41,10 @@ fetch_kubeconfig:
     ssh root@frost.lan "kubectl --kubeconfig /etc/kubernetes/cluster-admin.kubeconfig config view --flatten" > $HOME/.kube/config-lab.yaml
     @echo "Fetched kubeconfig and saved to $HOME/.kube/config-lab.yaml"
 
+# Fetch the kubernetes apitoken from frost and encrypt it using sops.
+fetch_apitoken:
+    ssh root@frost.lan "cat /var/lib/cfssl/apitoken.secret"
+
 # Pull a host's SSH public key and convert it to an age public key.
 host_to_age host:
     ssh-keyscan {{host}}.lan 2>/dev/null | grep ssh-ed25519 | ssh-to-age
@@ -52,14 +56,25 @@ refresh_secrets:
         sops updatekeys "$f"; \
     done
 
-# Edit the shared cfssl HMAC key secret.
-edit_cfssl_auth_key:
-    sops .data/enc.cfssl_auth_key.txt
+# Select and edit/create a secret from the .data directory.
+edit_secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # List of supported secrets.
+    secrets=(
+        "certificate.cfssl-auth-key"
+        "kubernetes.apitoken"
+        "identity.admin-password"
+        "identity.idm-admin-password"
+        "identity.oauth-secret-kubernetes"
+    )
 
-# Fetch the kubernetes apitoken from frost and encrypt it using sops.
-fetch_apitoken:
-    ssh root@frost.lan "cat /var/lib/cfssl/apitoken.secret"
-
-# Edit the kubernetes apitoken.
-edit_apitoken:
-    sops .data/enc.apitoken.secret
+    PS3="Select a secret to create or edit: "
+    select name in "${secrets[@]}"; do
+        if [ -n "$name" ]; then
+            sops ".data/enc.$name"
+            break
+        else
+            echo "Invalid selection. Please choose a number from the list above."
+        fi
+    done
