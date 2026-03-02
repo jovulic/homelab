@@ -60,6 +60,7 @@ with lib;
         bindaddress = "127.0.0.1:8443";
         tls_chain = "/var/lib/certs/${cfg.certificate}.pem";
         tls_key = "/var/lib/certs/${cfg.certificate}-key.pem";
+        trust_x_forward_for = true;
       };
 
       provision = {

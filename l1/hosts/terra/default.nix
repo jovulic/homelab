@@ -206,7 +206,7 @@ let
               hosts."identity.lab" = {
                 certificate = "identity";
                 locations."/" = {
-                  proxyPass = "http://127.0.0.1:8443";
+                  proxyPass = "https://127.0.0.1:8443";
                 };
               };
             };
