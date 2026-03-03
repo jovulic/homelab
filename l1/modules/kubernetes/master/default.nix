@@ -102,7 +102,11 @@ with lib;
         # See https://kubernetes.io/docs/tasks/extend-kubernetes/configure-aggregation-layer/#ca-reusage-and-conflicts.
         extraOpts = ''
           --requestheader-client-ca-file=/var/lib/kubernetes/secrets/ca.pem \
-          --requestheader-allowed-names=""
+          --requestheader-allowed-names="" \
+          --oidc-issuer-url=https://identity.lab/oauth2/openid/kubernetes \
+          --oidc-client-id=kubernetes \
+          --oidc-username-claim=email \
+          --oidc-groups-claim=groups
         '';
       };
       controllerManager = {
