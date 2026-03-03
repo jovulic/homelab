@@ -90,11 +90,6 @@ with lib;
             ssd_cache_size = cfg.ssd.cacheSize;
             pool_name = cfg.poolName;
             vdev = escapeShellArgs cfg.vdev;
-            ssd_args =
-              if cfg.ssd.enable then
-                "log /dev/disk/by-partlabel/zfs_slog cache /dev/disk/by-partlabel/zfs_cache"
-              else
-                "";
           }
         );
       };

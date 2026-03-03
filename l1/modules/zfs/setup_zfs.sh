@@ -9,7 +9,6 @@ SSD_SLOG_SIZE="@ssd_slog_size@"
 SSD_CACHE_SIZE="@ssd_cache_size@"
 POOL_NAME="@pool_name@"
 VDEV="@vdev@"
-SSD_ARGS="@ssd_args@"
 
 if [ "$SSD_ENABLE" = "1" ]; then
   if ! zpool list "$SSD_FASTPOOL_NAME" -Ho name >/dev/null 2>&1; then
@@ -42,13 +41,18 @@ if [ "$SSD_ENABLE" = "1" ]; then
 fi
 
 if ! zpool list "$POOL_NAME" -Ho name >/dev/null 2>&1; then
+  ssd_args=""
+  if [ "$SSD_ENABLE" = "1" ]; then
+    ssd_args="log /dev/disk/by-partlabel/zfs_slog cache /dev/disk/by-partlabel/zfs_cache"
+  fi
+
   # shellcheck disable=SC2086
   zpool create \
     -f \
     -o ashift=12 \
     -m none \
     "$POOL_NAME" \
-    $VDEV $SSD_ARGS
+    $VDEV $ssd_args
 fi
 
 if ! zfs list "$POOL_NAME/default" -Ho name >/dev/null 2>&1; then
