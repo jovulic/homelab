@@ -20,6 +20,16 @@ with lib;
       example = "identity.lab";
       description = "The identity domain.";
     };
+    address = mkOption {
+      type = types.str;
+      description = "The identity bind address.";
+      default = "0.0.0.0";
+    };
+    port = mkOption {
+      type = types.port;
+      default = 8443;
+      description = "The port identity will listen on.";
+    };
     certificate = mkOption {
       type = types.str;
       example = "identity";
@@ -57,7 +67,7 @@ with lib;
       serverSettings = {
         domain = cfg.domain;
         origin = "https://${cfg.domain}";
-        bindaddress = "127.0.0.1:8443";
+        bindaddress = "${cfg.address}:${cfg.port}";
         tls_chain = "/var/lib/certs/${cfg.certificate}.pem";
         tls_key = "/var/lib/certs/${cfg.certificate}-key.pem";
         trust_x_forward_for = true;

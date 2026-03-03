@@ -139,11 +139,13 @@ let
             registry = {
               enable = true;
               address = "127.0.0.1";
-              port = 5000;
+              port = 46243;
             };
 
             identity = {
               enable = true;
+              address = "127.0.0.1";
+              port = 43368;
               domain = "identity.lab";
               certificate = "identity";
               adminPasswordFile = config.sops.secrets.admin-password.path;
@@ -193,7 +195,7 @@ let
               hosts."registry.lab" = {
                 certificate = "registry";
                 locations."/" = {
-                  proxyPass = "http://127.0.0.1:5000";
+                  proxyPass = "http://127.0.0.1:46243";
                   extraConfig = "client_max_body_size 0;";
                 };
               };

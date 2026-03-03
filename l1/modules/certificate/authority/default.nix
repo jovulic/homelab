@@ -88,7 +88,7 @@ with lib;
       };
       port = mkOption {
         type = types.port;
-        default = 23775;
+        default = 8888;
         description = "Port for the cfssl server";
       };
       authKeyFile = mkOption {
