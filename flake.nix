@@ -56,6 +56,7 @@
               pkgs.deploy-rs
               pkgs.sops
               pkgs.ssh-to-age
+              pkgs.kanidm_1_8
             ];
           };
           packages =

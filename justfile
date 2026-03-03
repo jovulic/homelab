@@ -83,3 +83,25 @@ edit_secret:
             echo "Invalid selection. Please choose a number from the list above."
         fi
     done
+# Set a user's password using the interactive update command.
+set_password user:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Check if we are logged in AND the session is valid.
+    # Kanidm sometimes returns exit code 0 even on 401 SessionExpired, so we check stderr for ERROR.
+    if ! kanidm self whoami --url https://identity.lab --name idm_admin 2>&1 | grep -qv "ERROR"; then
+        echo "Not logged in or session expired. Logging in as idm_admin..."
+        kanidm login --url https://identity.lab --name idm_admin
+    fi
+
+    # Ensure MFA is not strictly required for initial password setup.
+    echo "Checking mfa policy for idm_all_persons..."
+    current_policy=$(kanidm group get idm_all_persons --url https://identity.lab --name idm_admin | grep "credential_type_minimum:" | awk '{print $2}' || echo "unknown")
+    if [ "$current_policy" != "any" ]; then
+        echo "Lowering mfa requirement for idm_all_persons to 'any'..."
+        kanidm group account-policy credential-type-minimum idm_all_persons any --url https://identity.lab --name idm_admin
+    fi
+
+    echo "Updating credentials for {{user}}..."
+    kanidm person credential update {{user}} --url https://identity.lab --name idm_admin
+

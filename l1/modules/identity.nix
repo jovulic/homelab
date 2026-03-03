@@ -63,21 +63,53 @@ with lib;
         trust_x_forward_for = true;
       };
 
-      provision = {
-        enable = true;
-        adminPasswordFile = cfg.adminPasswordFile;
-        idmAdminPasswordFile = cfg.idmAdminPasswordFile;
+      provision =
+        let
+          k8sAdminGroup = "k8s_admin";
+        in
+        {
+          enable = true;
+          adminPasswordFile = cfg.adminPasswordFile;
+          idmAdminPasswordFile = cfg.idmAdminPasswordFile;
 
-        systems.oauth2 = mkIf cfg.kubernetes.enable {
-          "kubernetes" = {
-            present = true;
-            displayName = "OIDC for Kubernetes";
-            originUrl = "https://${cfg.domain}";
-            originLanding = "http://localhost:8000";
-            basicSecretFile = cfg.kubernetes.secretFile;
+          groups = {
+            ${k8sAdminGroup} = { };
+          };
+
+          persons = {
+            "me" = {
+              displayName = "Me";
+              mailAddresses = [ "me@${cfg.domain}" ];
+              groups = [ k8sAdminGroup ];
+            };
+          };
+
+          systems.oauth2 = mkIf cfg.kubernetes.enable {
+            "kubernetes" = {
+              present = true;
+              displayName = "OIDC for Kubernetes";
+              originUrl = "https://${cfg.domain}";
+              originLanding = "http://localhost:8000";
+              basicSecretFile = cfg.kubernetes.secretFile;
+              scopeMaps = {
+                ${k8sAdminGroup} = [
+                  "openid"
+                  "profile"
+                  "email"
+                  "groups"
+                ];
+              };
+              claimMaps = {
+                "groups" = {
+                  joinType = "array";
+                  valuesByGroup = {
+                    ${k8sAdminGroup} = [ "${k8sAdminGroup}" ];
+                  };
+                };
+              };
+            };
           };
         };
-      };
     };
   };
 }
