@@ -43,7 +43,7 @@ fetch_k8s_ca:
 
 # Fetch the cluster admin homelab kubeconfig and install it locally.
 fetch_kubeconfig:
-    ssh root@frost.lan "kubectl --kubeconfig /etc/kubernetes/cluster-admin.kubeconfig config view --flatten" > $HOME/.kube/config-lab.yaml
+    ssh root@frost.lan "kubectl --kubeconfig /etc/kubernetes/cluster-admin.kubeconfig config view --flatten" > $HOME/.kube/config-homelab-admin.yaml
     @echo "Fetched kubeconfig and saved to $HOME/.kube/config-lab.yaml"
 
 # Fetch the kubernetes apitoken from frost and encrypt it using sops.
