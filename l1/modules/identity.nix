@@ -88,8 +88,8 @@ with lib;
             "kubernetes" = {
               present = true;
               displayName = "OIDC for Kubernetes";
-              originUrl = "https://${cfg.domain}";
-              originLanding = "http://localhost:8000";
+              originUrl = [ "http://localhost:8000" ];
+              originLanding = "https://kubernetes.lab"; # NOTE: once the dashboard is up this can point there.
               basicSecretFile = cfg.kubernetes.secretFile;
               scopeMaps = {
                 ${k8sAdminGroup} = [
