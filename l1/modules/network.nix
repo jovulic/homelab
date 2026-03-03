@@ -93,6 +93,14 @@ with lib;
 
     };
 
-    services.openssh.enable = true;
+    services.openssh = {
+      enable = true;
+      settings = {
+        AllowUsers = [
+          "root"
+          "me"
+        ];
+      };
+    };
   };
 }
