@@ -9,11 +9,7 @@ in
 with lib;
 {
   options.homelab.certificate.trust = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Whether to trust the homelab CA certificate.";
-    };
+    enable = mkEnableOption "trust certificate authority";
   };
   config = mkIf cfg.enable {
     security.pki.certificates =

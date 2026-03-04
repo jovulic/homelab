@@ -9,11 +9,7 @@ in
 with lib;
 {
   options.homelab.proxy = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable proxy.";
-    };
+    enable = mkEnableOption "proxy";
 
     hosts = mkOption {
       description = "Virtual hosts for the proxy";

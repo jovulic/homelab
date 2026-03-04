@@ -47,7 +47,7 @@ in
 with lib;
 {
   options.homelab.netboot = {
-    enable = mkEnableOption "Enable netboot configuration.";
+    enable = mkEnableOption "netboot";
     hosts = mkOption {
       type = types.listOf (
         types.submodule {

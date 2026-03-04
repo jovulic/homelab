@@ -10,47 +10,43 @@ in
 with lib;
 {
   options.homelab.certificate.remote = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable remote certificate generation";
-    };
+    enable = mkEnableOption "remote certificate";
 
     server = mkOption {
       type = types.str;
-      description = "URL of the cfssl server";
+      description = "URL of the cfssl server.";
     };
 
     authKeyFile = mkOption {
       type = types.nullOr types.path;
       default = null;
-      description = "Path to the file containing the shared HMAC key for cfssl authentication";
+      description = "Path to the file containing the shared HMAC key for cfssl authentication.";
     };
 
     certificates = mkOption {
-      description = "Certificates to generate";
+      description = "Certificates to generate.";
       default = { };
       type = types.attrsOf (
         types.submodule {
           options = {
             commonName = mkOption {
               type = types.str;
-              description = "Common Name for the certificate";
+              description = "Common Name for the certificate.";
             };
             hosts = mkOption {
               type = types.listOf types.str;
               default = [ ];
-              description = "Hosts for the certificate (SANs)";
+              description = "Hosts for the certificate (SANs).";
             };
             organization = mkOption {
               type = types.str;
               default = "Homelab";
-              description = "Organization for the certificate";
+              description = "Organization for the certificate.";
             };
             organizationalUnit = mkOption {
               type = types.str;
               default = "Hosts";
-              description = "Organizational Unit for the certificate";
+              description = "Organizational Unit for the certificate.";
             };
             profile = mkOption {
               type = types.enum [
@@ -60,7 +56,7 @@ with lib;
                 "intermediate"
               ];
               default = "server";
-              description = "cfssl profile to use";
+              description = "cfssl profile to use.";
             };
           };
         }

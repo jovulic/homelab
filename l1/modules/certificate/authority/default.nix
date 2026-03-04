@@ -10,59 +10,61 @@ in
 with lib;
 {
   options.homelab.certificate.authority = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable certificate generation";
-    };
+    enable = mkEnableOption "certificate authority";
 
-    rootCertificateAuthority = {
-      commonName = mkOption {
-        type = types.str;
-        default = "Homelab Root CA";
-        description = "Common Name for the Root CA";
-      };
-      organization = mkOption {
-        type = types.str;
-        default = "Homelab";
-        description = "Organization for the Root CA";
-      };
-      organizationalUnit = mkOption {
-        type = types.str;
-        default = "Root CA";
-        description = "Organizational Unit for the Root CA";
-      };
-      expiry = mkOption {
-        type = types.str;
-        default = "87600h"; # 10 years
-        description = "Expiry for the Root CA";
+    rootCertificateAuthority = mkOption {
+      description = "Root certificate authority to generate.";
+      default = { };
+      type = types.submodule {
+        options = {
+          commonName = mkOption {
+            type = types.str;
+            default = "Homelab Root CA";
+            description = "Common Name for the Root CA.";
+          };
+          organization = mkOption {
+            type = types.str;
+            default = "Homelab";
+            description = "Organization for the Root CA.";
+          };
+          organizationalUnit = mkOption {
+            type = types.str;
+            default = "Root CA";
+            description = "Organizational Unit for the Root CA.";
+          };
+          expiry = mkOption {
+            type = types.str;
+            default = "87600h"; # 10 years
+            description = "Expiry for the Root CA.";
+          };
+        };
       };
     };
 
     certificates = mkOption {
-      description = "Certificates to generate";
+      description = "Certificates to generate.";
       default = { };
       type = types.attrsOf (
         types.submodule {
           options = {
             commonName = mkOption {
               type = types.str;
-              description = "Common Name for the certificate";
+              description = "Common Name for the certificate.";
             };
             hosts = mkOption {
               type = types.listOf types.str;
               default = [ ];
-              description = "Hosts for the certificate (SANs)";
+              description = "Hosts for the certificate (SANs).";
             };
             organization = mkOption {
               type = types.str;
               default = "Homelab";
-              description = "Organization for the certificate";
+              description = "Organization for the certificate.";
             };
             organizationalUnit = mkOption {
               type = types.str;
               default = "Hosts";
-              description = "Organizational Unit for the certificate";
+              description = "Organizational Unit for the certificate.";
             };
             profile = mkOption {
               type = types.enum [
@@ -72,29 +74,35 @@ with lib;
                 "intermediate"
               ];
               default = "server";
-              description = "cfssl profile to use";
+              description = "cfssl profile to use.";
             };
           };
         }
       );
     };
 
-    server = {
-      enable = mkEnableOption "Enable cfssl server";
-      address = mkOption {
-        type = types.str;
-        default = "0.0.0.0";
-        description = "Address for the cfssl server";
-      };
-      port = mkOption {
-        type = types.port;
-        default = 8888;
-        description = "Port for the cfssl server";
-      };
-      authKeyFile = mkOption {
-        type = types.nullOr types.path;
-        default = null;
-        description = "Path to the file containing the shared HMAC key for cfssl authentication";
+    server = mkOption {
+      description = "The cfssl server configuration.";
+      default = { };
+      type = types.submodule {
+        options = {
+          enable = mkEnableOption "cfssl server";
+          address = mkOption {
+            type = types.str;
+            default = "0.0.0.0";
+            description = "Address for the cfssl server.";
+          };
+          port = mkOption {
+            type = types.port;
+            default = 8888;
+            description = "Port for the cfssl server.";
+          };
+          authKeyFile = mkOption {
+            type = types.nullOr types.path;
+            default = null;
+            description = "Path to the file containing the shared HMAC key for cfssl authentication.";
+          };
+        };
       };
     };
   };

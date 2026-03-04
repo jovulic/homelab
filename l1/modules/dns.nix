@@ -10,11 +10,7 @@ in
 with lib;
 {
   options.homelab.dns = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable dns.";
-    };
+    enable = mkEnableOption "dns";
     zones = mkOption {
       type = types.attrsOf (
         types.submodule {
@@ -68,7 +64,8 @@ with lib;
       '';
     };
 
-    systemd.services.coredns.restartTriggers =
-      mapAttrsToList (name: zone: config.environment.etc."coredns/${name}.db".source) cfg.zones;
+    systemd.services.coredns.restartTriggers = mapAttrsToList (
+      name: zone: config.environment.etc."coredns/${name}.db".source
+    ) cfg.zones;
   };
 }

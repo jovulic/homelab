@@ -5,12 +5,10 @@ with lib;
     ./master
     ./node
   ];
-  options = {
-    homelab.kubernetes = {
-      masterAddress = mkOption {
-        type = types.str;
-        description = "The master address.";
-      };
+  options.homelab.kubernetes = {
+    masterAddress = mkOption {
+      type = types.str;
+      description = "The master address.";
     };
   };
 }

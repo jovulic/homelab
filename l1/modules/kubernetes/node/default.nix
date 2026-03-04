@@ -9,18 +9,12 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.kubernetes.node = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable kubernetes node configuration.";
-      };
-      apitokenFile = mkOption {
-        type = types.nullOr types.path;
-        default = null;
-        description = "Path to the apitoken secret file.";
-      };
+  options.homelab.kubernetes.node = {
+    enable = mkEnableOption "kubernetes node";
+    apitokenFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Path to the apitoken secret file.";
     };
   };
   config = mkIf cfg.enable {

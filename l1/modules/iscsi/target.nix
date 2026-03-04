@@ -4,14 +4,8 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.iscsi.target = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable iscsi target configuration.";
-      };
-    };
+  options.homelab.iscsi.target = {
+    enable = mkEnableOption "iscsi target (server)";
   };
   config = mkIf cfg.enable {
     networking = {

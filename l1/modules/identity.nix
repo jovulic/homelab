@@ -10,11 +10,7 @@ in
 with lib;
 {
   options.homelab.identity = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable identity.";
-    };
+    enable = mkEnableOption "identity";
     domain = mkOption {
       type = types.str;
       example = "identity.lab";
@@ -45,15 +41,20 @@ with lib;
       default = null;
       description = "Path to the idm admin password file.";
     };
-    kubernetes = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable kubernetes oauth2.";
-      };
-      secretFile = mkOption {
-        type = types.str;
-        description = "Path to kubernetes shared secret.";
+    kubernetes = mkOption {
+      default = { };
+      type = types.submodule {
+        options = {
+          enable = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Enable kubernetes oauth2.";
+          };
+          secretFile = mkOption {
+            type = types.str;
+            description = "Path to kubernetes shared secret.";
+          };
+        };
       };
     };
   };
@@ -67,7 +68,7 @@ with lib;
       serverSettings = {
         domain = cfg.domain;
         origin = "https://${cfg.domain}";
-        bindaddress = "${cfg.address}:${cfg.port}";
+        bindaddress = "${cfg.address}:${toString cfg.port}";
         tls_chain = "/var/lib/certs/${cfg.certificate}.pem";
         tls_key = "/var/lib/certs/${cfg.certificate}-key.pem";
         trust_x_forward_for = true;

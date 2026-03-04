@@ -10,11 +10,7 @@ in
 with lib;
 {
   options.homelab.registry = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable container registry.";
-    };
+    enable = mkEnableOption "registry";
     dataset = mkOption {
       type = types.str;
       default = "pool/default";

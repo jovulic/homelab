@@ -8,18 +8,16 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.user = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable user configuration.";
-      };
-      key = mkOption {
-        type = types.str;
-        description = "The user authorized key.";
-        example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
-      };
+  options.homelab.user = {
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable user configuration.";
+    };
+    key = mkOption {
+      type = types.str;
+      description = "The user authorized key.";
+      example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGdXDo+F2+TVAwH3CLJnK2SUIJR/6HvBeHEcfQbYxjk cardno:17_742_648";
     };
   };
   config = mkIf cfg.enable {

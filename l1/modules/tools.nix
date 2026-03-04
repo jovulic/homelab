@@ -9,13 +9,11 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.tools = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable tools configuration.";
-      };
+  options.homelab.tools = {
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable tools configuration.";
     };
   };
   config = mkIf cfg.enable {

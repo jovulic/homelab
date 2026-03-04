@@ -9,65 +9,64 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.zfs = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable zfs configuration.";
-      };
-      hostId = mkOption {
-        type = types.str;
-        example = "028406e6"; # head -c 8 /etc/machine-id
-        description = options.boot.networking.hostId.description;
-      };
-      poolName = mkOption {
-        type = types.str;
-        default = "pool";
-        description = "The name of the ZFS pool to create and manage.";
-      };
-      vdev = mkOption {
-        type = types.listOf types.str;
-        example = [
-          "mirror"
-          "/dev/disk/by-id/disk1"
-          "/dev/disk/by-id/disk2"
-        ];
-        description = "The vdev configuration arguments for the zpool.";
-      };
-      ssd = {
-        enable = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable partitioning an SSD for SLOG, L2ARC, and a fastpool.";
+  options.homelab.zfs = {
+    enable = mkEnableOption "zfs";
+    hostId = mkOption {
+      type = types.str;
+      example = "028406e6"; # head -c 8 /etc/machine-id
+      description = options.boot.networking.hostId.description;
+    };
+    poolName = mkOption {
+      type = types.str;
+      default = "pool";
+      description = "The name of the ZFS pool to create and manage.";
+    };
+    vdev = mkOption {
+      type = types.listOf types.str;
+      example = [
+        "mirror"
+        "/dev/disk/by-id/disk1"
+        "/dev/disk/by-id/disk2"
+      ];
+      description = "The vdev configuration arguments for the zpool.";
+    };
+    ssd = mkOption {
+      default = { };
+      type = types.submodule {
+        options = {
+          enable = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Enable partitioning an SSD for SLOG, L2ARC, and a fastpool.";
+          };
+          device = mkOption {
+            type = types.str;
+            default = "";
+            example = "/dev/disk/by-id/nvme-1234567890";
+            description = "The block device path of the SSD.";
+          };
+          slogSize = mkOption {
+            type = types.str;
+            default = "16G";
+            description = "Size of the SLOG partition.";
+          };
+          cacheSize = mkOption {
+            type = types.str;
+            default = "64G";
+            description = "Size of the L2ARC cache partition.";
+          };
+          fastpoolName = mkOption {
+            type = types.str;
+            default = "fastpool";
+            description = "The name of the fastpool created from the remaining SSD space.";
+          };
         };
-        device = mkOption {
-          type = types.str;
-          default = "";
-          example = "/dev/disk/by-id/nvme-1234567890";
-          description = "The block device path of the SSD.";
-        };
-        slogSize = mkOption {
-          type = types.str;
-          default = "16G";
-          description = "Size of the SLOG partition.";
-        };
-        cacheSize = mkOption {
-          type = types.str;
-          default = "64G";
-          description = "Size of the L2ARC cache partition.";
-        };
-        fastpoolName = mkOption {
-          type = types.str;
-          default = "fastpool";
-          description = "The name of the fastpool created from the remaining SSD space.";
-        };
       };
-      setup = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Run the setup scripts.";
-      };
+    };
+    setup = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Run the setup scripts.";
     };
   };
   config =

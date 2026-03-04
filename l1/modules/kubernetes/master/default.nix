@@ -9,18 +9,12 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.kubernetes.master = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable kubernetes master configuration.";
-      };
-      certificateName = mkOption {
-        type = types.str;
-        default = "ca";
-        description = "Name of the certificate to use as Kubernetes CA (found in /var/lib/certs/)";
-      };
+  options.homelab.kubernetes.master = {
+    enable = mkEnableOption "kubernetes master";
+    certificateName = mkOption {
+      type = types.str;
+      default = "ca";
+      description = "Name of the certificate to use as Kubernetes CA (found in /var/lib/certs/).";
     };
   };
   config = mkIf cfg.enable {

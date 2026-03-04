@@ -9,34 +9,33 @@ let
 in
 with lib;
 {
-  options = {
-    bootstrap = {
-      enable = mkOption {
-        type = types.bool;
-        description = "Enable machine bootstrap.";
-        default = true;
-      };
-      device = mkOption {
-        type = types.str;
-        description = "The target device path to bootstrap.";
-        example = "/dev/nvme0n1";
-      };
-      hostname = mkOption {
-        type = types.str;
-        description = "The host hostname.";
-      };
-      user.key = mkOption {
-        type = types.str;
-        description = "The user authorized key.";
-        example = "ssh-ed25519 ...";
-      };
-      ignoreLidSwitch = mkOption {
-        type = types.bool;
-        description = "Whether to ignore the lid switch.";
-        default = false;
-      };
+  options.bootstrap = {
+    enable = mkOption {
+      type = types.bool;
+      description = "Enable machine bootstrap.";
+      default = true;
+    };
+    device = mkOption {
+      type = types.str;
+      description = "The target device path to bootstrap.";
+      example = "/dev/nvme0n1";
+    };
+    hostname = mkOption {
+      type = types.str;
+      description = "The host hostname.";
+    };
+    user.key = mkOption {
+      type = types.str;
+      description = "The user authorized key.";
+      example = "ssh-ed25519 ...";
+    };
+    ignoreLidSwitch = mkOption {
+      type = types.bool;
+      description = "Whether to ignore the lid switch.";
+      default = false;
     };
   };
+
   config =
     let
       bootstrap = pkgs.writeShellApplication {

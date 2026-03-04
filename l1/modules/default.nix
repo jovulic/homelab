@@ -16,5 +16,6 @@
     ./tools.nix
     ./user.nix
     ./zfs
+    ./zfsilo
   ];
 }

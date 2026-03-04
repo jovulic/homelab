@@ -8,13 +8,11 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.nix = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable nix configuration.";
-      };
+  options.homelab.nix = {
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable nix configuration.";
     };
   };
   config = mkIf cfg.enable {

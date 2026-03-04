@@ -14,35 +14,34 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.network = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable network configuration.";
-      };
-      hostName = mkOption {
-        type = types.str;
-        example = "terra";
-        description = options.networking.hostName.description;
-      };
-      hostAddress = mkOption {
-        type = types.str;
-        example = "192.168.1.5";
-        description = ''
-          List of IPv4 addresses that will be statically assigned to the interface.
-        ''; # https://github.com/NixOS/nixpkgs/blob/nixos-22.11/nixos/modules/tasks/network-interfaces.nix#L199
-      };
-      networkInterfaces = mkOption {
-        type = types.listOf types.str;
-        example = [
-          "enp1s0"
-          "enp2s0"
-        ];
-        description = "The physical network interface(s). If multiple are provided, they are automatically bonded.";
-      };
+  options.homelab.network = {
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable network configuration.";
+    };
+    hostName = mkOption {
+      type = types.str;
+      example = "terra";
+      description = options.networking.hostName.description;
+    };
+    hostAddress = mkOption {
+      type = types.str;
+      example = "192.168.1.5";
+      description = ''
+        List of IPv4 addresses that will be statically assigned to the interface.
+      ''; # https://github.com/NixOS/nixpkgs/blob/nixos-22.11/nixos/modules/tasks/network-interfaces.nix#L199
+    };
+    networkInterfaces = mkOption {
+      type = types.listOf types.str;
+      example = [
+        "enp1s0"
+        "enp2s0"
+      ];
+      description = "The physical network interface(s). If multiple are provided, they are automatically bonded.";
     };
   };
+
   config = mkIf cfg.enable {
     networking = {
       hostName = cfg.hostName;

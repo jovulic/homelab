@@ -4,18 +4,12 @@ let
 in
 with lib;
 {
-  options = {
-    homelab.iscsi.initiator = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable iscsi initiator configuration.";
-      };
-      iqn = mkOption {
-        type = types.str;
-        example = "iqn.2006-01.org.linux-iscsi.hostname";
-        description = "Initiator IQN.";
-      };
+  options.homelab.iscsi.initiator = {
+    enable = mkEnableOption "iscsi initiator (client)";
+    iqn = mkOption {
+      type = types.str;
+      example = "iqn.2006-01.org.linux-iscsi.hostname";
+      description = "Initiator IQN.";
     };
   };
   config = mkIf cfg.enable {
