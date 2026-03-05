@@ -72,12 +72,35 @@ edit_secret:
         "identity.admin-password"
         "identity.idm-admin-password"
         "identity.oauth-secret-kubernetes"
+        "zfsilo.token"
+        "zfsilo.password"
+        "zfsilo.produce-password"
+        "zfsilo.consume-password"
     )
 
     PS3="Select a secret to create or edit: "
     select name in "${secrets[@]}"; do
         if [ -n "$name" ]; then
             sops ".data/enc.$name"
+
+            # Remove trailing newline that editors like vim often add. This is
+            # critical for secrets used in JSON/YAML templates.
+            # perl -0777 -pe 's/\n\z//' removes only the final newline.
+            echo "Stripping trailing newline from $name..."
+            tmp_secret=$(mktemp)
+            sops -d ".data/enc.$name" | perl -0777 -pe 's/\n\z//' | sops -e --filename-override ".data/enc.$name" /dev/stdin > "$tmp_secret"
+            mv "$tmp_secret" ".data/enc.$name"
+
+            if [ "$name" == "zfsilo.password" ]; then
+                echo "Automatically updating zfsilo.password-hashed..."
+                # Decrypt plain password, hash it, then encrypt back to hashed secret.
+                # We strip newlines from both the input and the final hashed output.
+                sops -d ".data/enc.zfsilo.password" | \
+                    mkpasswd -m sha-512 -s | \
+                    tr -d '\n' | \
+                    sops -e --filename-override ".data/enc.zfsilo.password-hashed" /dev/stdin > ".data/enc.zfsilo.password-hashed"
+                echo "Done updating zfsilo.password-hashed."
+            fi
             break
         else
             echo "Invalid selection. Please choose a number from the list above."
