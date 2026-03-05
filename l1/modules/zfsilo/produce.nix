@@ -12,7 +12,7 @@ with lib;
     enable = mkEnableOption "zfsilo producer";
     image = mkOption {
       type = types.str;
-      default = "ghcr.io/jovulic/zfsilo:0.3.0";
+      default = "ghcr.io/jovulic/zfsilo:0.3.1";
       description = "The zfsilo image to use.";
     };
     address = mkOption {
