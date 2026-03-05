@@ -51,6 +51,15 @@ let
               sopsFile = ../../../.data/enc.kubernetes.apitoken;
               format = "binary";
             };
+            secrets.zfsilo-password = {
+              sopsFile = ../../../.data/enc.zfsilo.password;
+              format = "binary";
+            };
+            secrets.zfsilo-password-hashed = {
+              sopsFile = ../../../.data/enc.zfsilo.password-hashed;
+              format = "binary";
+              neededForUsers = true;
+            };
           };
 
           homelab = {
@@ -77,6 +86,13 @@ let
             };
 
             user.key = userKey;
+
+            zfsilo.consume = {
+              enable = true;
+              user = {
+                hashedPasswordFile = config.sops.secrets.zfsilo-password-hashed.path;
+              };
+            };
 
             iscsi.initiator = {
               enable = true;
