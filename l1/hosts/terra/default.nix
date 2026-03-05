@@ -71,6 +71,33 @@ let
               owner = "kanidm";
               group = "kanidm";
             };
+            secrets.zfsilo-token = {
+              sopsFile = ../../../.data/enc.zfsilo.token;
+              format = "binary";
+              owner = "zfsilo";
+              group = "zfsilo";
+            };
+            secrets.zfsilo-password = {
+              sopsFile = ../../../.data/enc.zfsilo.password;
+              format = "binary";
+            };
+            secrets.zfsilo-password-hashed = {
+              sopsFile = ../../../.data/enc.zfsilo.password-hashed;
+              format = "binary";
+              neededForUsers = true;
+            };
+            secrets.zfsilo-produce-password = {
+              sopsFile = ../../../.data/enc.zfsilo.produce-password;
+              format = "binary";
+              owner = "zfsilo";
+              group = "zfsilo";
+            };
+            secrets.zfsilo-consume-password = {
+              sopsFile = ../../../.data/enc.zfsilo.consume-password;
+              format = "binary";
+              owner = "zfsilo";
+              group = "zfsilo";
+            };
           };
 
           homelab = {
@@ -156,6 +183,87 @@ let
               };
             };
 
+            zfsilo.produce = {
+              enable = true;
+              address = "127.0.0.1";
+              port = 34537;
+              service = {
+                externalServerUri = "zfsilo.lab:443";
+                authorizedKeys = [
+                  {
+                    identity = "system";
+                    token = config.sops.placeholder.zfsilo-token;
+                  }
+                ];
+              };
+              command = {
+                produceTarget = {
+                  password = config.sops.placeholder.zfsilo-produce-password;
+                };
+                consumeTargets = [
+                  {
+                    connect = {
+                      address = "frost.lan";
+                      password = config.sops.placeholder.zfsilo-password;
+                    };
+                    password = config.sops.placeholder.zfsilo-consume-password;
+                    iqn = "iqn.2006-01.org.linux-iscsi.frost";
+                  }
+                  # {
+                  #   connect = {
+                  #     address = "phantom.lan";
+                  #     password = config.sops.placeholder.zfsilo-password;
+                  #   };
+                  #   password = config.sops.placeholder.zfsilo-consume-password;
+                  #   iqn = "iqn.2006-01.org.linux-iscsi.phantom";
+                  # }
+                  {
+                    connect = {
+                      address = "hades.lan";
+                      password = config.sops.placeholder.zfsilo-password;
+                    };
+                    password = config.sops.placeholder.zfsilo-consume-password;
+                    iqn = "iqn.2006-01.org.linux-iscsi.hades";
+                  }
+                  {
+                    connect = {
+                      address = "optiplex.lan";
+                      password = config.sops.placeholder.zfsilo-password;
+                    };
+                    password = config.sops.placeholder.zfsilo-consume-password;
+                    iqn = "iqn.2006-01.org.linux-iscsi.optiplex";
+                  }
+                  {
+                    connect = {
+                      address = "think1.lan";
+                      password = config.sops.placeholder.zfsilo-password;
+                    };
+                    password = config.sops.placeholder.zfsilo-consume-password;
+                    iqn = "iqn.2006-01.org.linux-iscsi.think1";
+                  }
+                  {
+                    connect = {
+                      address = "think2.lan";
+                      password = config.sops.placeholder.zfsilo-password;
+                    };
+                    password = config.sops.placeholder.zfsilo-consume-password;
+                    iqn = "iqn.2006-01.org.linux-iscsi.think2";
+                  }
+                  {
+                    connect = {
+                      address = "think3.lan";
+                      password = config.sops.placeholder.zfsilo-password;
+                    };
+                    password = config.sops.placeholder.zfsilo-consume-password;
+                    iqn = "iqn.2006-01.org.linux-iscsi.think3";
+                  }
+                ];
+              };
+              user = {
+                hashedPasswordFile = config.sops.secrets.zfsilo-password-hashed.path;
+              };
+            };
+
             certificate.authority = {
               enable = true;
               server = {
@@ -186,6 +294,13 @@ let
                     "*.identity.lab"
                   ];
                 };
+                zfsilo = {
+                  commonName = "zfsilo.lab";
+                  hosts = [
+                    "zfsilo.lab"
+                    "*.zfsilo.lab"
+                  ];
+                };
               };
             };
             certificate.trust.enable = true;
@@ -208,7 +323,13 @@ let
               hosts."identity.lab" = {
                 certificate = "identity";
                 locations."/" = {
-                  proxyPass = "https://127.0.0.1:8443";
+                  proxyPass = "https://127.0.0.1:43368";
+                };
+              };
+              hosts."zfsilo.lab" = {
+                certificate = "zfsilo";
+                locations."/" = {
+                  proxyPass = "https://127.0.0.1:34537";
                 };
               };
             };
@@ -225,6 +346,9 @@ let
 
                   identity.lab. IN A ${address}
                   *.identity.lab. IN A ${address}
+
+                  zfsilo.lab. IN A ${address}
+                  *.zfsilo.lab. IN A ${address}
                 '';
               };
             };
