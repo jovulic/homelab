@@ -2,12 +2,14 @@
   config,
   lib,
   pkgs,
+  hlib,
   ...
 }:
 let
   cfg = config.homelab.identity;
 in
 with lib;
+with hlib;
 {
   options.homelab.identity = {
     enable = mkEnableOption "identity";
@@ -31,15 +33,15 @@ with lib;
       example = "identity";
       description = "The identity domain certificate.";
     };
-    adminPasswordFile = mkOption {
-      type = types.nullOr types.str;
+    adminPassword = mkOption {
+      type = types.nullOr htypes.sopsSecret;
       default = null;
-      description = "Path to the admin password file.";
+      description = "The admin password.";
     };
-    idmAdminPasswordFile = mkOption {
-      type = types.nullOr types.str;
+    idmAdminPassword = mkOption {
+      type = types.nullOr htypes.sopsSecret;
       default = null;
-      description = "Path to the idm admin password file.";
+      description = "The idm admin password.";
     };
     kubernetes = mkOption {
       default = { };
@@ -50,9 +52,9 @@ with lib;
             default = false;
             description = "Enable kubernetes oauth2.";
           };
-          secretFile = mkOption {
-            type = types.str;
-            description = "Path to kubernetes shared secret.";
+          secret = mkOption {
+            type = htypes.sopsSecret;
+            description = "The kubernetes shared secret.";
           };
         };
       };
@@ -80,8 +82,9 @@ with lib;
         in
         {
           enable = true;
-          adminPasswordFile = cfg.adminPasswordFile;
-          idmAdminPasswordFile = cfg.idmAdminPasswordFile;
+          adminPasswordFile = if cfg.adminPassword != null then cfg.adminPassword.secret.path else null;
+          idmAdminPasswordFile =
+            if cfg.idmAdminPassword != null then cfg.idmAdminPassword.secret.path else null;
 
           groups = {
             ${k8sAdminGroup} = { };
@@ -101,7 +104,7 @@ with lib;
               displayName = "OIDC for Kubernetes";
               originUrl = [ "http://localhost:8000" ];
               originLanding = "https://kubernetes.lab"; # NOTE: once the dashboard is up this can point there.
-              basicSecretFile = cfg.kubernetes.secretFile;
+              basicSecretFile = cfg.kubernetes.secret.secret.path;
               scopeMaps = {
                 ${k8sAdminGroup} = [
                   "openid"

@@ -2,12 +2,14 @@
   config,
   lib,
   pkgs,
+  hlib,
   ...
 }:
 let
   cfg = config.homelab.certificate.authority;
 in
 with lib;
+with hlib;
 {
   options.homelab.certificate.authority = {
     enable = mkEnableOption "certificate authority";
@@ -97,10 +99,10 @@ with lib;
             default = 8888;
             description = "Port for the cfssl server.";
           };
-          authKeyFile = mkOption {
-            type = types.nullOr types.path;
+          authKey = mkOption {
+            type = types.nullOr htypes.sopsSecret;
             default = null;
-            description = "Path to the file containing the shared HMAC key for cfssl authentication.";
+            description = "The shared HMAC key for cfssl authentication.";
           };
         };
       };
@@ -143,21 +145,8 @@ with lib;
         pkgs.cfssl
       ];
 
-      environment.etc = {
-        "certs/ca.json".text = builtins.toJSON {
-          CN = cfg.rootCertificateAuthority.commonName;
-          key = {
-            algo = "ecdsa";
-            size = 256;
-          };
-          names = [
-            {
-              O = cfg.rootCertificateAuthority.organization;
-              OU = cfg.rootCertificateAuthority.organizationalUnit;
-            }
-          ];
-        };
-        "certs/cfssl.json".text = builtins.toJSON (
+      sops.templates."cfssl.json" = {
+        content = builtins.toJSON (
           {
             signing = {
               default = {
@@ -205,7 +194,7 @@ with lib;
                     is_ca = true;
                     max_path_len = 1;
                   };
-                  auth_remote = mkIf (cfg.server.authKeyFile != null) {
+                  auth_remote = mkIf (cfg.server.authKey != null) {
                     auth_key = "default";
                     remote = "default";
                   };
@@ -213,15 +202,32 @@ with lib;
               };
             };
           }
-          // (optionalAttrs (cfg.server.authKeyFile != null) {
+          // (optionalAttrs (cfg.server.authKey != null) {
             auth_keys = {
               default = {
                 type = "standard";
-                key = "PLACEHOLDER";
+                key = cfg.server.authKey.placeholder;
               };
             };
           })
         );
+      };
+
+      environment.etc = {
+        "certs/ca.json".text = builtins.toJSON {
+          CN = cfg.rootCertificateAuthority.commonName;
+          key = {
+            algo = "ecdsa";
+            size = 256;
+          };
+          names = [
+            {
+              O = cfg.rootCertificateAuthority.organization;
+              OU = cfg.rootCertificateAuthority.organizationalUnit;
+            }
+          ];
+        };
+        "certs/cfssl.json".source = config.sops.templates."cfssl.json".path;
       }
       // (mapAttrs' (
         name: certCfg:
@@ -266,7 +272,7 @@ with lib;
               -port ${toString cfg.server.port} \
               -ca /var/lib/certs/ca.pem \
               -ca-key /var/lib/certs/ca-key.pem \
-              ${optionalString (cfg.server.authKeyFile != null) "-authkey ${cfg.server.authKeyFile}"} \
+              ${optionalString (cfg.server.authKey != null) "-authkey ${cfg.server.authKey.secret.path}"} \
               -config /etc/certs/cfssl.json
           '';
           WorkingDirectory = "/var/lib/certs";

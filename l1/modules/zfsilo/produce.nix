@@ -1,12 +1,14 @@
 {
   config,
   lib,
+  hlib,
   ...
 }:
 let
   cfg = config.homelab.zfsilo.produce;
 in
 with lib;
+with hlib;
 {
   options.homelab.zfsilo.produce = {
     enable = mkEnableOption "zfsilo producer";
@@ -43,7 +45,7 @@ with lib;
                     description = "The identity name for the API key.";
                   };
                   token = mkOption {
-                    type = types.str;
+                    type = htypes.sopsSecret;
                     description = "The API token.";
                   };
                 };
@@ -76,7 +78,7 @@ with lib;
             type = types.submodule {
               options = {
                 password = mkOption {
-                  type = types.str;
+                  type = htypes.sopsSecret;
                   description = "The iSCSI password.";
                 };
               };
@@ -105,15 +107,15 @@ with lib;
                           description = "Remote SSH username.";
                         };
                         password = mkOption {
-                          type = types.str;
-                          default = "";
+                          type = types.nullOr htypes.sopsSecret;
+                          default = null;
                           description = "The SSH password.";
                         };
                       };
                     };
                   };
                   password = mkOption {
-                    type = types.str;
+                    type = htypes.sopsSecret;
                     description = "The iSCSI password.";
                   };
                   iqn = mkOption {
@@ -138,10 +140,10 @@ with lib;
             default = "zfsilo";
             description = "The zfsilo user name";
           };
-          hashedPasswordFile = mkOption {
-            type = types.nullOr types.path;
+          hashedPassword = mkOption {
+            type = types.nullOr htypes.sopsSecret;
             default = null;
-            description = "The hashed password file.";
+            description = "The hashed password.";
           };
         };
       };
@@ -158,7 +160,8 @@ with lib;
       users.users.${cfg.user.name} = {
         isNormalUser = true;
         extraGroups = [ "wheel" ];
-        hashedPasswordFile = cfg.user.hashedPasswordFile;
+        hashedPasswordFile =
+          if cfg.user.hashedPassword != null then cfg.user.hashedPassword.secret.path else null;
       };
       security.sudo.extraRules = [
         {
@@ -188,7 +191,7 @@ with lib;
             externalServerURI = cfg.service.externalServerUri;
             keys = map (key: {
               identity = key.identity;
-              token = key.token;
+              token = key.token.placeholder;
             }) cfg.service.authorizedKeys;
           };
           database = {
@@ -201,7 +204,7 @@ with lib;
               host = {
                 hostname = config.networking.hostName;
               };
-              password = cfg.command.produceTarget.password;
+              password = cfg.command.produceTarget.password.placeholder;
             };
             consumeTargets = map (target: {
               type = "REMOTE";
@@ -209,10 +212,10 @@ with lib;
                 address = target.connect.address;
                 port = target.connect.port;
                 username = target.connect.username;
-                password = target.connect.password;
+                password = if target.connect.password != null then target.connect.password.placeholder else "";
               };
               iqn = target.iqn;
-              password = target.password;
+              password = target.password.placeholder;
             }) cfg.command.consumeTargets;
           };
         };

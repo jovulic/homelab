@@ -2,12 +2,14 @@
   config,
   lib,
   pkgs,
+  hlib,
   ...
 }:
 let
   cfg = config.homelab.certificate.remote;
 in
 with lib;
+with hlib;
 {
   options.homelab.certificate.remote = {
     enable = mkEnableOption "remote certificate";
@@ -17,10 +19,10 @@ with lib;
       description = "URL of the cfssl server.";
     };
 
-    authKeyFile = mkOption {
-      type = types.nullOr types.path;
+    authKey = mkOption {
+      type = types.nullOr htypes.sopsSecret;
       default = null;
-      description = "Path to the file containing the shared HMAC key for cfssl authentication.";
+      description = "The shared HMAC key for cfssl authentication.";
     };
 
     certificates = mkOption {
@@ -79,7 +81,7 @@ with lib;
                 if [[ ! -e ${name}.pem ]]; then
                   cfssl gencert \
                     -remote ${cfg.server} \
-                    ${optionalString (cfg.authKeyFile != null) "-authkey ${cfg.authKeyFile}"} \
+                    ${optionalString (cfg.authKey != null) "-authkey ${cfg.authKey.secret.path}"} \
                     -profile=${certCfg.profile} \
                     /etc/certs/${name}.json | \
                   cfssljson -bare ${name}

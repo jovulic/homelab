@@ -10,6 +10,7 @@ let
   };
   inherit (inputs) nixpkgs deploy-rs sops-nix;
   inherit (pkgs) lib;
+  hlib = import ./lib { inherit lib; };
 
   # NOTE: We ignore phantom as the machine is currently in-use elsewhere.
   ignoredHosts = [ "phantom" ];
@@ -35,6 +36,7 @@ let
           deploy-rs
           sops-nix
           lib
+          hlib
           ;
         hosts = self;
       }

@@ -2,23 +2,25 @@
   config,
   lib,
   pkgs,
+  hlib,
   ...
 }:
 let
   cfg = config.homelab.kubernetes.node;
 in
 with lib;
+with hlib;
 {
   options.homelab.kubernetes.node = {
     enable = mkEnableOption "kubernetes node";
-    apitokenFile = mkOption {
-      type = types.nullOr types.path;
+    apitoken = mkOption {
+      type = types.nullOr htypes.sopsSecret;
       default = null;
-      description = "Path to the apitoken secret file.";
+      description = "The kubernetes API token.";
     };
   };
   config = mkIf cfg.enable {
-    systemd.services.kubernetes-apitoken = mkIf (cfg.apitokenFile != null) {
+    systemd.services.kubernetes-apitoken = mkIf (cfg.apitoken != null) {
       description = "Setup Kubernetes Node API Token";
       enable = true;
       wantedBy = [ "multi-user.target" ];
@@ -32,14 +34,14 @@ with lib;
             runtimeInputs = [ pkgs.coreutils ];
             text = builtins.readFile (
               pkgs.replaceVars ./setup_apitoken.sh {
-                apitoken_file = builtins.toString cfg.apitokenFile;
+                apitoken_file = builtins.toString cfg.apitoken.secret.path;
               }
             );
           }
         }/bin/setup_apitoken";
       };
     };
-    systemd.services.kubelet = mkIf (cfg.apitokenFile != null) {
+    systemd.services.kubelet = mkIf (cfg.apitoken != null) {
       after = [ "kubernetes-apitoken.service" ];
       requires = [ "kubernetes-apitoken.service" ];
     };
@@ -74,17 +76,9 @@ with lib;
             delegate = {
               hairpinMode = true;
               isDefaultGateway = true;
-              bridge = "mynet";
             };
           }
         ];
-      };
-      proxy = {
-        # Reasons for extra options.
-        # --metrics-bind-address - we bind the metrics server to 0.0.0.0 so it can be scraped by prometheus.
-        extraOpts = ''
-          --metrics-bind-address=0.0.0.0:10249
-        '';
       };
     };
   };
