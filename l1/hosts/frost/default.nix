@@ -3,6 +3,7 @@
   deploy-rs,
   sops-nix,
   lib,
+  hlib,
   ...
 }:
 let
@@ -12,6 +13,7 @@ let
   bootstrapNetboot =
     (nixpkgs.lib.nixosSystem {
       inherit system;
+      specialArgs = { inherit hlib; };
       modules = [
         "${nixpkgs}/nixos/modules/installer/netboot/netboot-minimal.nix"
         ../../bootstrap
@@ -28,6 +30,7 @@ let
     }).config.system.build;
   targetSystem = nixpkgs.lib.nixosSystem {
     inherit system;
+    specialArgs = { inherit hlib; };
     modules = [
       sops-nix.nixosModules.sops
       ../../modules
@@ -49,10 +52,6 @@ let
           sops = {
             secrets.cfssl-auth-key = {
               sopsFile = ../../../.data/enc.certificate.cfssl-auth-key;
-              format = "binary";
-            };
-            secrets.zfsilo-password = {
-              sopsFile = ../../../.data/enc.zfsilo.password;
               format = "binary";
             };
             secrets.zfsilo-password-hashed = {
@@ -90,7 +89,7 @@ let
             zfsilo.consume = {
               enable = true;
               user = {
-                hashedPasswordFile = config.sops.secrets.zfsilo-password-hashed.path;
+                hashedPassword = (hlib.mkSopsSecret config "zfsilo-password-hashed");
               };
             };
 
@@ -103,7 +102,7 @@ let
             certificate.remote = {
               enable = true;
               server = "https://certificate.lab";
-              authKeyFile = config.sops.secrets.cfssl-auth-key.path;
+              authKey = (hlib.mkSopsSecret config "cfssl-auth-key");
               certificates.k8s-ca = {
                 commonName = "Kubernetes CA";
                 profile = "intermediate";

@@ -3,6 +3,7 @@
   deploy-rs,
   sops-nix,
   lib,
+  hlib,
   ...
 }:
 let
@@ -12,6 +13,7 @@ let
   bootstrapNetboot =
     (nixpkgs.lib.nixosSystem {
       inherit system;
+      specialArgs = { inherit hlib; };
       modules = [
         "${nixpkgs}/nixos/modules/installer/netboot/netboot-minimal.nix"
         ../../bootstrap
@@ -28,6 +30,7 @@ let
     }).config.system.build;
   targetSystem = nixpkgs.lib.nixosSystem {
     inherit system;
+    specialArgs = { inherit hlib; };
     modules = [
       sops-nix.nixosModules.sops
       ../../modules
@@ -45,10 +48,6 @@ let
           sops = {
             secrets.apitoken = {
               sopsFile = ../../../.data/enc.kubernetes.apitoken;
-              format = "binary";
-            };
-            secrets.zfsilo-password = {
-              sopsFile = ../../../.data/enc.zfsilo.password;
               format = "binary";
             };
             secrets.zfsilo-password-hashed = {
@@ -88,7 +87,7 @@ let
             zfsilo.consume = {
               enable = true;
               user = {
-                hashedPasswordFile = config.sops.secrets.zfsilo-password-hashed.path;
+                hashedPassword = (hlib.mkSopsSecret config "zfsilo-password-hashed");
               };
             };
 
@@ -98,7 +97,7 @@ let
               masterAddress = "frost.lan";
               node = {
                 enable = true;
-                apitokenFile = config.sops.secrets.apitoken.path;
+                apitoken = (hlib.mkSopsSecret config "apitoken");
               };
             };
           };

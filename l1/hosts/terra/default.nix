@@ -4,6 +4,7 @@
   sops-nix,
   lib,
   hosts ? { },
+  hlib,
   ...
 }:
 let
@@ -14,6 +15,7 @@ let
   bootstrapUsb =
     (nixpkgs.lib.nixosSystem {
       inherit system;
+      specialArgs = { inherit hlib; };
       modules = [
         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
         ../../bootstrap
@@ -30,6 +32,7 @@ let
     }).config.system.build.isoImage;
   targetSystem = nixpkgs.lib.nixosSystem {
     inherit system;
+    specialArgs = { inherit hlib; };
     modules = [
       sops-nix.nixosModules.sops
       ../../modules
@@ -175,11 +178,11 @@ let
               port = 43368;
               domain = "identity.lab";
               certificate = "identity";
-              adminPasswordFile = config.sops.secrets.admin-password.path;
-              idmAdminPasswordFile = config.sops.secrets.idm-admin-password.path;
+              adminPassword = (hlib.mkSopsSecret config "admin-password");
+              idmAdminPassword = (hlib.mkSopsSecret config "idm-admin-password");
               kubernetes = {
                 enable = true;
-                secretFile = config.sops.secrets.oauth-secret.path;
+                secret = (hlib.mkSopsSecret config "oauth-secret");
               };
             };
 
@@ -192,75 +195,75 @@ let
                 authorizedKeys = [
                   {
                     identity = "system";
-                    token = config.sops.placeholder.zfsilo-token;
+                    token = (hlib.mkSopsSecret config "zfsilo-token");
                   }
                 ];
               };
               command = {
                 produceTarget = {
-                  password = config.sops.placeholder.zfsilo-produce-password;
+                  password = (hlib.mkSopsSecret config "zfsilo-produce-password");
                 };
                 consumeTargets = [
                   {
                     connect = {
                       address = "frost.lan";
-                      password = config.sops.placeholder.zfsilo-password;
+                      password = (hlib.mkSopsSecret config "zfsilo-password");
                     };
-                    password = config.sops.placeholder.zfsilo-consume-password;
+                    password = (hlib.mkSopsSecret config "zfsilo-consume-password");
                     iqn = "iqn.2006-01.org.linux-iscsi.frost";
                   }
                   # {
                   #   connect = {
                   #     address = "phantom.lan";
-                  #     password = config.sops.placeholder.zfsilo-password;
+                  #     password = "zfsilo-password";
                   #   };
-                  #   password = config.sops.placeholder.zfsilo-consume-password;
+                  #   password = "zfsilo-consume-password";
                   #   iqn = "iqn.2006-01.org.linux-iscsi.phantom";
                   # }
                   {
                     connect = {
                       address = "hades.lan";
-                      password = config.sops.placeholder.zfsilo-password;
+                      password = (hlib.mkSopsSecret config "zfsilo-password");
                     };
-                    password = config.sops.placeholder.zfsilo-consume-password;
+                    password = (hlib.mkSopsSecret config "zfsilo-consume-password");
                     iqn = "iqn.2006-01.org.linux-iscsi.hades";
                   }
                   {
                     connect = {
                       address = "optiplex.lan";
-                      password = config.sops.placeholder.zfsilo-password;
+                      password = (hlib.mkSopsSecret config "zfsilo-password");
                     };
-                    password = config.sops.placeholder.zfsilo-consume-password;
+                    password = (hlib.mkSopsSecret config "zfsilo-consume-password");
                     iqn = "iqn.2006-01.org.linux-iscsi.optiplex";
                   }
                   {
                     connect = {
                       address = "think1.lan";
-                      password = config.sops.placeholder.zfsilo-password;
+                      password = (hlib.mkSopsSecret config "zfsilo-password");
                     };
-                    password = config.sops.placeholder.zfsilo-consume-password;
+                    password = (hlib.mkSopsSecret config "zfsilo-consume-password");
                     iqn = "iqn.2006-01.org.linux-iscsi.think1";
                   }
                   {
                     connect = {
                       address = "think2.lan";
-                      password = config.sops.placeholder.zfsilo-password;
+                      password = (hlib.mkSopsSecret config "zfsilo-password");
                     };
-                    password = config.sops.placeholder.zfsilo-consume-password;
+                    password = (hlib.mkSopsSecret config "zfsilo-consume-password");
                     iqn = "iqn.2006-01.org.linux-iscsi.think2";
                   }
                   {
                     connect = {
                       address = "think3.lan";
-                      password = config.sops.placeholder.zfsilo-password;
+                      password = (hlib.mkSopsSecret config "zfsilo-password");
                     };
-                    password = config.sops.placeholder.zfsilo-consume-password;
+                    password = (hlib.mkSopsSecret config "zfsilo-consume-password");
                     iqn = "iqn.2006-01.org.linux-iscsi.think3";
                   }
                 ];
               };
               user = {
-                hashedPasswordFile = config.sops.secrets.zfsilo-password-hashed.path;
+                hashedPassword = (hlib.mkSopsSecret config "zfsilo-password-hashed");
               };
             };
 
@@ -270,7 +273,7 @@ let
                 enable = true;
                 address = "127.0.0.1";
                 port = 23775;
-                authKeyFile = config.sops.secrets.cfssl-auth-key.path;
+                authKey = (hlib.mkSopsSecret config "cfssl-auth-key");
               };
               certificates = {
                 registry = {
