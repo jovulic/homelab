@@ -22,7 +22,6 @@ with lib;
       enable = true;
       enable32Bit = true;
 
-      # Inject ROCm and OpenCL support into the homelab's graphics stack.
       extraPackages = with pkgs; [
         rocmPackages.clr.icd # OpenCL support
         rocmPackages.clr # HIP support
