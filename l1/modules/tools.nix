@@ -25,6 +25,7 @@ with lib;
       pkgs.coreutils # gnu core utilities
       pkgs.neovim # vim text editor fork focused on extensibility and agility
       pkgs.kubectl # kubernetes cli
+      pkgs.pciutils # collection of programs for inspecting and manipulating configuration of pci devices
     ];
   };
 }
