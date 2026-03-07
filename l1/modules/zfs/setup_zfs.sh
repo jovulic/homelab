@@ -10,6 +10,64 @@ SSD_CACHE_SIZE="@ssd_cache_size@"
 POOL_NAME="@pool_name@"
 VDEV="@vdev@"
 
+setup_encryption_key() {
+  local key_file="/var/lib/zfs/encryption.key"
+  if [ ! -f "$key_file" ]; then
+    mkdir -p /var/lib/zfs/
+    dd if=/dev/urandom of="$key_file" bs=32 count=1
+    chmod 600 "$key_file"
+  fi
+}
+
+setup_default_dataset() {
+  local pool="$1"
+  local key_file="/var/lib/zfs/encryption.key"
+
+  if ! zfs list "$pool/default" -Ho name >/dev/null 2>&1; then
+    zfs create \
+      -o mountpoint=none \
+      -o recordsize=128KB \
+      -o compression=lz4 \
+      -o encryption=on -o keyformat=raw -o keylocation="file://$key_file" \
+      -o atime=off \
+      -o dnodesize=auto \
+      -o xattr=sa \
+      "$pool/default"
+  fi
+}
+
+setup_block_dataset() {
+  local pool="$1"
+  local key_file="/var/lib/zfs/encryption.key"
+
+  if ! zfs list "$pool/block" -Ho name >/dev/null 2>&1; then
+    zfs create \
+      -o mountpoint=none \
+      -o compression=lz4 \
+      -o encryption=on -o keyformat=raw -o keylocation="file://$key_file" \
+      "$pool/block"
+  fi
+}
+
+setup_postgres_dataset() {
+  local pool="$1"
+  local key_file="/var/lib/zfs/encryption.key"
+
+  if ! zfs list "$pool/postgres" -Ho name >/dev/null 2>&1; then
+    zfs create \
+      -o mountpoint=none \
+      -o recordsize=8k \
+      -o compression=lz4 \
+      -o encryption=on -o keyformat=raw -o keylocation="file://$key_file" \
+      -o atime=off \
+      -o dnodesize=auto \
+      -o xattr=sa \
+      "$pool/postgres"
+  fi
+}
+
+setup_encryption_key
+
 if [ "$SSD_ENABLE" = "1" ]; then
   if ! zpool list "$SSD_FASTPOOL_NAME" -Ho name >/dev/null 2>&1; then
     echo "Partitioning SSD $SSD_DEVICE..."
@@ -38,6 +96,10 @@ if [ "$SSD_ENABLE" = "1" ]; then
       "$SSD_FASTPOOL_NAME" \
       "/dev/disk/by-partlabel/zfs_$SSD_FASTPOOL_NAME"
   fi
+
+  setup_default_dataset "$SSD_FASTPOOL_NAME"
+  setup_block_dataset "$SSD_FASTPOOL_NAME"
+  setup_postgres_dataset "$SSD_FASTPOOL_NAME"
 fi
 
 if ! zpool list "$POOL_NAME" -Ho name >/dev/null 2>&1; then
@@ -55,40 +117,6 @@ if ! zpool list "$POOL_NAME" -Ho name >/dev/null 2>&1; then
     $VDEV $ssd_args
 fi
 
-if ! zfs list "$POOL_NAME/default" -Ho name >/dev/null 2>&1; then
-  mkdir -p /var/lib/zfs/
-  dd if=/dev/urandom of=/var/lib/zfs/default.key bs=32 count=1
-  zfs create \
-    -o mountpoint=none \
-    -o recordsize=128KB \
-    -o compression=lz4 \
-    -o encryption=on -o keyformat=raw -o keylocation=file:///var/lib/zfs/default.key \
-    -o atime=off \
-    -o dnodesize=auto \
-    -o xattr=sa \
-    "$POOL_NAME/default"
-fi
-
-if ! zfs list "$POOL_NAME/block" -Ho name >/dev/null 2>&1; then
-  mkdir -p /var/lib/zfs/
-  dd if=/dev/urandom of=/var/lib/zfs/block.key bs=32 count=1
-  zfs create \
-    -o mountpoint=none \
-    -o compression=lz4 \
-    -o encryption=on -o keyformat=raw -o keylocation=file:///var/lib/zfs/block.key \
-    "$POOL_NAME/block"
-fi
-
-if ! zfs list "$POOL_NAME/postgres" -Ho name >/dev/null 2>&1; then
-  mkdir -p /var/lib/zfs/
-  dd if=/dev/urandom of=/var/lib/zfs/postgres.key bs=32 count=1
-  zfs create \
-    -o mountpoint=none \
-    -o recordsize=8k \
-    -o compression=lz4 \
-    -o encryption=on -o keyformat=raw -o keylocation=file:///var/lib/zfs/postgres.key \
-    -o atime=off \
-    -o dnodesize=auto \
-    -o xattr=sa \
-    "$POOL_NAME/postgres"
-fi
+setup_default_dataset "$POOL_NAME"
+setup_block_dataset "$POOL_NAME"
+setup_postgres_dataset "$POOL_NAME"
