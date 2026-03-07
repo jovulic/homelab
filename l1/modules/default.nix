@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./amdgpu.nix
     ./boot.nix
     ./certificate
     ./dns.nix

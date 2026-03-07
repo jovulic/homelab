@@ -86,6 +86,10 @@ let
 
             user.key = userKey;
 
+            amdgpu = {
+              enable = true;
+            };
+
             zfsilo.consume = {
               enable = true;
               user = {
