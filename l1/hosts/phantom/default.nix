@@ -79,6 +79,10 @@ let
 
             user.key = userKey;
 
+            nvidia = {
+              enable = true;
+            };
+
             iscsi.initiator = {
               enable = true;
               iqn = "iqn.2006-01.org.linux-iscsi.${name}";

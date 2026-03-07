@@ -11,6 +11,7 @@
     ./netboot
     ./network.nix
     ./nix.nix
+    ./nvidia.nix
     ./proxy.nix
     ./registry
     ./tools.nix
