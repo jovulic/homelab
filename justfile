@@ -50,6 +50,10 @@ fetch_kubeconfig:
 fetch_apitoken:
     ssh root@frost.lan "cat /var/lib/cfssl/apitoken.secret"
 
+# Fetch the ZFS encryption key from terra and emit it as a base64 string.
+fetch_encryption_key:
+    ssh root@terra.lan "cat /var/lib/zfs/encryption.key | base64 -w 0"
+
 # Pull a host's SSH public key and convert it to an age public key.
 host_to_age host:
     ssh-keyscan {{host}}.lan 2>/dev/null | grep ssh-ed25519 | ssh-to-age
