@@ -10,6 +10,11 @@ with lib;
 {
   options.homelab.nfs = {
     enable = mkEnableOption "nfs";
+    domain = mkOption {
+      type = types.str;
+      default = "homelab";
+      description = "The domain for idmapd authentication.";
+    };
     exports = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -24,6 +29,9 @@ with lib;
 
     # Ensure NFS server starts after create ZFS datasets are created.
     systemd.services.nfs-server.after = [ "setup-zfs-create.service" ];
+
+    # Allow for idmapd authentication.
+    services.nfs.idmapd.settings.General.Domain = cfg.domain;
 
     networking.firewall = {
       enable = true;
