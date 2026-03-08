@@ -10,11 +10,6 @@ with lib;
 {
   options.homelab.nfs = {
     enable = mkEnableOption "nfs";
-    domain = mkOption {
-      type = types.str;
-      default = "homelab";
-      description = "The domain for idmapd authentication.";
-    };
     exports = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -30,14 +25,11 @@ with lib;
     # Ensure NFS server starts after create ZFS datasets are created.
     systemd.services.nfs-server.after = [ "setup-zfs-create.service" ];
 
-    # Allow for idmapd authentication.
-    services.nfs.idmapd.settings.General.Domain = cfg.domain;
-
     networking.firewall = {
       enable = true;
       allowedTCPPorts = [
         111 # rpcbind (required for showmount)
-        2049 # 2049: nfs (the actual file transfer protocol)
+        2049 # nfs (the actual file transfer protocol)
         4000 # statd and lockd (file locking mechanisms)
         4001 # statd and lockd (file locking mechanisms)
         20048 # mountd (required for nfsv3 mounting)

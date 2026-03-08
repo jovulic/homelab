@@ -90,6 +90,8 @@ with lib;
         ];
       };
 
+      # NOTE: This is used by nfs for idmapd authentication.
+      domain = "home.arpa";
     };
 
     services.openssh = {
