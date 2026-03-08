@@ -153,6 +153,7 @@ let
                   {
                     dataset = "pool/default/storage";
                     mount = true;
+                    user = "me";
                   }
                 ];
               };

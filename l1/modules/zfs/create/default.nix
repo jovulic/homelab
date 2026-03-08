@@ -24,6 +24,11 @@ with lib;
               default = true;
               description = "Whether to mount the dataset.";
             };
+            user = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "Optional user to own the dataset mountpoint.";
+            };
           };
         }
       );
