@@ -147,6 +147,22 @@ let
                 device = "/dev/disk/by-id/nvme-EDILOCA_EN605_1TB_AA243050132";
               };
               setup = true;
+              create = {
+                enable = true;
+                datasets = [
+                  {
+                    dataset = "pool/default/storage";
+                    mount = true;
+                  }
+                ];
+              };
+            };
+
+            nfs = {
+              enable = true;
+              exports = [
+                "/pool/default/storage 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)"
+              ];
             };
 
             iscsi.target = {
