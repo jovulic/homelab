@@ -9,6 +9,7 @@ let
 in
 with lib;
 {
+  imports = [ ./extra ];
   options.homelab.zfs = {
     enable = mkEnableOption "zfs";
     hostId = mkOption {
