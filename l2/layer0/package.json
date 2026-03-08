@@ -1,0 +1,14 @@
+{
+  "name": "layer0",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@homelab/modules": "*",
+    "@pulumi/kubernetes": "^4.0.0",
+    "@pulumi/pulumi": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
+  }
+}

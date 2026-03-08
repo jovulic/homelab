@@ -57,7 +57,21 @@
               pkgs.sops
               pkgs.ssh-to-age
               pkgs.kanidm_1_8
+              pkgs.pulumi
+              pkgs.nodejs
             ];
+            shellHook = ''
+              storage_path="/mnt/storage"
+              pulumi_storage_path="$storage_path/pulumi"
+              if [ ! -e "$pulumi_storage_path" ]; then
+                mkdir -p "$pulumi_storage_path"
+                echo "Created directory $pulumi_storage_path"
+              fi
+
+              export REPOSITORY_ROOT="$(git rev-parse --show-toplevel)"
+              export PULUMI_BACKEND_URL="file://$pulumi_storage_path"
+              export PULUMI_CONFIG_PASSPHRASE="$(gopass show --nosync -n -o homelab/pulumi/passphrase)"
+            '';
           };
           packages =
             let

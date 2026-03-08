@@ -110,6 +110,15 @@ edit_secret:
             echo "Invalid selection. Please choose a number from the list above."
         fi
     done
+# Apply a specific Pulumi layer in l2.
+apply layer *options:
+    cd l2/{{layer}} && pulumi up {{options}}
+
+# Apply all Pulumi layers in l2 in order.
+apply_all:
+    just apply layer0 --yes
+    just apply layer1 --yes
+
 # Set a user's password using the interactive update command.
 set_password user:
     #!/usr/bin/env bash
