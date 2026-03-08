@@ -22,8 +22,8 @@ with lib;
       exports = concatStringsSep "\n" cfg.exports;
     };
 
-    # Ensure NFS server starts after extra ZFS datasets are created
-    systemd.services.nfs-server.after = [ "setup-zfs-extra.service" ];
+    # Ensure NFS server starts after create ZFS datasets are created.
+    systemd.services.nfs-server.after = [ "setup-zfs-create.service" ];
 
     networking.firewall = {
       enable = true;
