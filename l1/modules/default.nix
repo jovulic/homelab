@@ -11,6 +11,7 @@
     ./monitor.nix
     ./netboot
     ./network.nix
+    ./nfs.nix
     ./nix.nix
     ./nvidia.nix
     ./proxy.nix
