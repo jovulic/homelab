@@ -2,7 +2,7 @@
   description = "My over-engineered home network.";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.11";
+    nixpkgs.url = "nixpkgs/nixos-26.05";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
     };
@@ -56,7 +56,7 @@
               pkgs.deploy-rs
               pkgs.sops
               pkgs.ssh-to-age
-              pkgs.kanidm_1_8
+              pkgs.kanidm_1_10
               pkgs.pulumi
               pkgs.nodejs
             ];
